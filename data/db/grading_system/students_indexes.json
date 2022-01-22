@@ -1,0 +1,10 @@
+[
+  {
+    "key": "__id__",
+    "value": "./data/db/grading_system/students___id___index.json"
+  },
+  {
+    "key": "name",
+    "value": "./data/db/grading_system/students_name_index.json"
+  }
+]
