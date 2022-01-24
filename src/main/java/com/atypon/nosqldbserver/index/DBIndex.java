@@ -57,6 +57,10 @@ public abstract class DBIndex<K, V> {
         }
     }
 
+    public int size() {
+        return indexMap.size();
+    }
+
     public String toJSON() {
         return JSONUtils.convertToJSON(this.indexMap);
     }

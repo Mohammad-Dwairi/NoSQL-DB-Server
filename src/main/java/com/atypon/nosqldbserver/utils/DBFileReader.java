@@ -25,6 +25,20 @@ public class DBFileReader {
         }
     }
 
+    public static List<String> readLines(String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            List<String> lines = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+            return lines;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
     public static String readAt(String filePath, DBDocumentLocation location) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
             raf.seek(location.getStartByte());
@@ -52,4 +66,6 @@ public class DBFileReader {
             throw new RuntimeException(e.getMessage());
         }
     }
+
+
 }

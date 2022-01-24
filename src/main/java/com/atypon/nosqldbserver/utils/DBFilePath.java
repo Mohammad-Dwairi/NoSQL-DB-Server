@@ -26,4 +26,8 @@ public class DBFilePath {
     public static String buildIndexesFilePath(CollectionId request) {
         return "./data/db/" + request.getSchemaName() + "/" + request.getCollectionName() + "_indexes.json";
     }
+
+    public static String buildFragmentationTrackerFilePath(CollectionId collectionId) {
+        return "./data/db/" + collectionId.getSchemaName() + "/" + collectionId.getCollectionName() + "_frag.json";
+    }
 }

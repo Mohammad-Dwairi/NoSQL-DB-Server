@@ -22,6 +22,13 @@ import static com.atypon.nosqldbserver.utils.DBFilePath.buildCollectionPath;
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
+
+    @Override
+    public List<String> findAll(CollectionId collectionId) {
+        final String collectionPath = buildCollectionPath(collectionId);
+        return DBFileReader.readLines(collectionPath);
+    }
+
     @Override
     public List<Map<String, String>> findAll(CollectionId collectionId, List<DBDocumentLocation> locations) {
         ObjectMapper mapper = new ObjectMapper();

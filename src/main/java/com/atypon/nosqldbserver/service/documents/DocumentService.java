@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface DocumentService {
-
+    List<String> findAll(CollectionId collectionId);
     List<Map<String, String>> findAll(CollectionId collectionId, List<DBDocumentLocation> locations);
     Map<String, String> find(CollectionId collectionId, DBDocumentLocation location);
     DBDocumentLocation save(CollectionId collectionId, Map<String, String> document);

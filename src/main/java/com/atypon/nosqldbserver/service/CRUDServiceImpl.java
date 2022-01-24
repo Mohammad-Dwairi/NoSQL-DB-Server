@@ -8,6 +8,7 @@ import com.atypon.nosqldbserver.index.DBRequestedIndex;
 import com.atypon.nosqldbserver.request.CollectionId;
 import com.atypon.nosqldbserver.request.DocumentId;
 import com.atypon.nosqldbserver.service.collection.CollectionService;
+import com.atypon.nosqldbserver.service.defragmentation.DefragmentationService;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.utils.DBFileWriter;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class CRUDServiceImpl implements CRUDService {
 
     private final CollectionService collectionService;
     private final DocumentService documentService;
-
+    private final DefragmentationService defragmentationService;
 
     @Override
     public List<Map<String, String>> findAll(CollectionId collectionId) {
@@ -40,13 +41,11 @@ public class CRUDServiceImpl implements CRUDService {
 
     @Override
     public List<Map<String, String>> find(DocumentId documentId) {
-        final String requestedIndexPath = buildRequestedIndexPath(documentId.getCollectionId(), documentId.getIndexedPropertyName());
         final String defaultIndexPath = buildDefaultIndexPath(documentId.getCollectionId());
-        final DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
-        Optional<List<String>> pointers = requestedIndex.get(documentId.getIndexedPropertyValue());
-        if (pointers.isPresent()) {
+        List<String> pointers = extractRequestedData(documentId);
+        if (!pointers.isEmpty()) {
             final DBDefaultIndex defaultIndex = new DBDefaultIndex(defaultIndexPath);
-            List<DBDocumentLocation> locations = defaultIndex.get(pointers.get());
+            List<DBDocumentLocation> locations = defaultIndex.get(pointers);
             if (locations == null) {
                 locations = new ArrayList<>();
             }
@@ -69,6 +68,7 @@ public class CRUDServiceImpl implements CRUDService {
             requestedIndex.add(key, defaultId);
             DBFileWriter.clearAndWrite(requestedIndex.toJSON(), registeredIndex.getValue());
         });
+        defragmentationService.update(collectionId, defaultIndex.size());
     }
 
     @Override
@@ -86,6 +86,7 @@ public class CRUDServiceImpl implements CRUDService {
         collectionService.getRegisteredIndexes(documentId.getCollectionId()).forEach(registeredIndex -> {
             collectionService.recoverExistingDocuments(collectionId, registeredIndex.getKey());
         });
+        defragmentationService.update(collectionId, defaultIndex.size());
     }
 
     @Override
@@ -107,6 +108,7 @@ public class CRUDServiceImpl implements CRUDService {
         collectionService.getRegisteredIndexes(documentId.getCollectionId()).forEach(registeredIndex -> {
             collectionService.recoverExistingDocuments(collectionId, registeredIndex.getKey());
         });
+        defragmentationService.update(collectionId, defaultIndex.size());
     }
 
     @Override
