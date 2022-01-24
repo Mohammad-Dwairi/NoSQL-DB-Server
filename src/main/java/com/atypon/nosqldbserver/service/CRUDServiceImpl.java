@@ -91,13 +91,9 @@ public class CRUDServiceImpl implements CRUDService {
     @Override
     public void updateByIndexedProperty(DocumentId documentId, Map<String, String> updates) {
         updates.remove("_$id");
-        final String indexedPropertyValue = documentId.getIndexedPropertyValue();
-        final CollectionId collectionId = documentId.getCollectionId();
-        final String requestedIndexPath = buildRequestedIndexPath(collectionId, documentId.getIndexedPropertyName());
-        DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
-        List<String> updatedPointers = requestedIndex.get(indexedPropertyValue).orElse(new ArrayList<>());
+        List<String> updatedPointers = extractRequestedData(documentId);
         updatedPointers.forEach(pointer -> {
-            update(new DocumentId(collectionId, "_$id", pointer), updates);
+            update(new DocumentId(documentId.getCollectionId(), "_$id", pointer), updates);
         });
     }
 
@@ -109,8 +105,22 @@ public class CRUDServiceImpl implements CRUDService {
         defaultIndex.drop(defaultId);
         DBFileWriter.clearAndWrite(defaultIndex.toJSON(), defaultIndex.getPath());
         collectionService.getRegisteredIndexes(documentId.getCollectionId()).forEach(registeredIndex -> {
-
+            collectionService.recoverExistingDocuments(collectionId, registeredIndex.getKey());
         });
+    }
+
+    @Override
+    public void deleteByIndexedProperty(DocumentId documentId) {
+        List<String> deletedPointers = extractRequestedData(documentId);
+        deletedPointers.forEach(pointer -> delete(new DocumentId(documentId.getCollectionId(), "_$id", pointer)));
+    }
+
+    private List<String> extractRequestedData(DocumentId documentId) {
+        final String indexedPropertyValue = documentId.getIndexedPropertyValue();
+        final CollectionId collectionId = documentId.getCollectionId();
+        final String requestedIndexPath = buildRequestedIndexPath(collectionId, documentId.getIndexedPropertyName());
+        DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
+        return requestedIndex.get(indexedPropertyValue).orElse(new ArrayList<>());
     }
 
     private String generateDefaultId() {

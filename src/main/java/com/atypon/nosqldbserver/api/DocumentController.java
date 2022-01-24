@@ -51,6 +51,6 @@ public class DocumentController {
 
     @DeleteMapping(params = {"property", "value"})
     public void delete(CollectionId colReq, @RequestParam String property, @RequestParam String value) {
-        crudService.delete(new DocumentId(colReq, property, value));
+        crudService.deleteByIndexedProperty(new DocumentId(colReq, property, value));
     }
 }

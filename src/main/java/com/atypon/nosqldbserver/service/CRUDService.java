@@ -20,4 +20,6 @@ public interface CRUDService {
 
     void delete(DocumentId docRequest);
 
+    void deleteByIndexedProperty(DocumentId documentId);
+
 }
