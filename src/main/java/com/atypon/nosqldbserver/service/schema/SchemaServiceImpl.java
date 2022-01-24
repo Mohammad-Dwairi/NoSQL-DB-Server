@@ -3,6 +3,7 @@ package com.atypon.nosqldbserver.service.schema;
 import com.atypon.nosqldbserver.core.DBSchema;
 import com.atypon.nosqldbserver.exceptions.JSONParseException;
 import com.atypon.nosqldbserver.exceptions.SchemaAlreadyExistsException;
+import com.atypon.nosqldbserver.exceptions.SchemaNotFoundException;
 import com.atypon.nosqldbserver.service.file.FileService;
 import com.atypon.nosqldbserver.utils.DBFileReader;
 import com.atypon.nosqldbserver.utils.DBFileWriter;
@@ -71,9 +72,13 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public void drop(String name) {
         List<DBSchema> schemas = findAll();
-        fileService.deleteFile(buildSchemaPath(name));
-        schemas.removeIf(s -> s.getName().equals(name));
-        writeToSchemaFile(schemas);
+        if (schemas.stream().anyMatch(s -> s.getName().equals(name))) {
+            fileService.deleteFile(buildSchemaPath(name));
+            schemas.removeIf(s -> s.getName().equals(name));
+            writeToSchemaFile(schemas);
+        } else {
+            throw new SchemaNotFoundException();
+        }
     }
 
     @Override

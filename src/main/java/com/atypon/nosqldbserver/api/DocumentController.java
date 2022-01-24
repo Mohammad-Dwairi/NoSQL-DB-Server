@@ -1,8 +1,7 @@
 package com.atypon.nosqldbserver.api;
 
-import com.atypon.nosqldbserver.request.CollectionRequest;
-import com.atypon.nosqldbserver.request.DocumentRequest;
-import com.atypon.nosqldbserver.request.Pair;
+import com.atypon.nosqldbserver.request.CollectionId;
+import com.atypon.nosqldbserver.request.DocumentId;
 import com.atypon.nosqldbserver.service.CRUDService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,29 +17,40 @@ public class DocumentController {
     private final CRUDService crudService;
 
     @GetMapping(params = {"property", "value"})
-    public List<Map<String, String>> findByIndexedKey(CollectionRequest collectionRequest, @RequestParam String property, @RequestParam String value) {
-        DocumentRequest docReq = new DocumentRequest(collectionRequest, property, value);
+    public List<Map<String, String>> findByIndexedKey(CollectionId collectionId, @RequestParam String property, @RequestParam String value) {
+        DocumentId docReq = new DocumentId(collectionId, property, value);
         return crudService.find(docReq);
     }
 
     @GetMapping
-    public List<Map<String, String>> findAll(CollectionRequest request) {
+    public List<Map<String, String>> findAll(CollectionId request) {
         return crudService.findAll(request);
     }
 
     @PostMapping
-    public void save(CollectionRequest colReq, @RequestBody Map<String, String> document) {
+    public void save(CollectionId colReq, @RequestBody Map<String, String> document) {
         crudService.save(colReq, document);
     }
 
-    @PutMapping
-    public void update(CollectionRequest collectionRequest, @RequestParam String property, @RequestParam String value, @RequestBody Map<String, String> updates) {
-        DocumentRequest req = new DocumentRequest(collectionRequest, property, value);
+    @PutMapping(params = {"property", "value"})
+    public void update(CollectionId collectionId, @RequestParam String property, @RequestParam String value, @RequestBody Map<String, String> updates) {
+        DocumentId req = new DocumentId(collectionId, property, value);
+        crudService.updateByIndexedProperty(req, updates);
+    }
+
+    @PutMapping("/{docId}")
+    public void update(CollectionId collectionId, @RequestBody Map<String, String> updates, @PathVariable String docId) {
+        DocumentId req = new DocumentId(collectionId, "_$id", docId);
         crudService.update(req, updates);
     }
 
-    @DeleteMapping
-    public void delete(CollectionRequest colReq, @RequestParam String property, @RequestParam String value) {
-        crudService.delete(new DocumentRequest(colReq, property, value));
+    @DeleteMapping("/{docId}")
+    public void delete(CollectionId colReq, @PathVariable String docId) {
+        crudService.delete(new DocumentId(colReq, "_$id", docId));
+    }
+
+    @DeleteMapping(params = {"property", "value"})
+    public void delete(CollectionId colReq, @RequestParam String property, @RequestParam String value) {
+        crudService.delete(new DocumentId(colReq, property, value));
     }
 }

@@ -1,6 +1,7 @@
 package com.atypon.nosqldbserver.utils;
 
-import com.atypon.nosqldbserver.request.CollectionRequest;
+import com.atypon.nosqldbserver.request.CollectionId;
+import com.atypon.nosqldbserver.request.DocumentId;
 
 public class DBFilePath {
 
@@ -8,19 +9,21 @@ public class DBFilePath {
         return "./data/db/" + schemaName;
     }
 
-    public static String buildCollectionPath(CollectionRequest colReq) {
+    public static String buildCollectionPath(CollectionId colReq) {
         return "./data/db/" + colReq.getSchemaName() + "/" + colReq.getCollectionName() + ".jsonl";
     }
 
-    public static String buildDefaultIndexPath(CollectionRequest request) {
+    public static String buildDefaultIndexPath(CollectionId request) {
         return "./data/db/" + request.getSchemaName() + "/" + request.getCollectionName() + "_index.json";
     }
 
-    public static String buildIndexPath(CollectionRequest request, String indexKeyName) {
-        return "./data/db/" + request.getSchemaName() + "/" + request.getCollectionName() + "_" + indexKeyName + "_index.json";
+    public static String buildRequestedIndexPath(CollectionId collectionId, String indexedProperty) {
+        String schema = collectionId.getSchemaName();
+        String col = collectionId.getCollectionName();
+        return "./data/db/" + schema + "/" + col + "_" + indexedProperty + "_index.json";
     }
 
-    public static String buildIndexesFilePath(CollectionRequest request) {
+    public static String buildIndexesFilePath(CollectionId request) {
         return "./data/db/" + request.getSchemaName() + "/" + request.getCollectionName() + "_indexes.json";
     }
 }

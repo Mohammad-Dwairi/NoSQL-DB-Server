@@ -7,9 +7,9 @@ import lombok.ToString;
 @Getter
 @ToString
 @RequiredArgsConstructor
-public class DocumentRequest {
+public class DocumentId {
 
-    private final CollectionRequest collectionRequest;
+    private final CollectionId collectionId;
     private final String indexedPropertyName;
     private final String indexedPropertyValue;
 

@@ -46,6 +46,11 @@ public class DBFileWriter {
         }
     }
 
+    public static void clearAndWrite(String document, String filePath) {
+        clear(filePath);
+        write(document, filePath);
+    }
+
     public static void clear(String filePath) {
         try {
             PrintWriter printWriter = new PrintWriter(filePath);

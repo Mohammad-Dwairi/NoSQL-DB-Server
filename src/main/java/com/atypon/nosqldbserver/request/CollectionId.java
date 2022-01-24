@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class CollectionRequest {
+public class CollectionId {
 
     private final String schemaName;
     private final String collectionName;

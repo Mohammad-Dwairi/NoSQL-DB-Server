@@ -1,21 +1,23 @@
 package com.atypon.nosqldbserver.service;
 
-import com.atypon.nosqldbserver.request.CollectionRequest;
-import com.atypon.nosqldbserver.request.DocumentRequest;
+import com.atypon.nosqldbserver.request.CollectionId;
+import com.atypon.nosqldbserver.request.DocumentId;
 
 import java.util.List;
 import java.util.Map;
 
 public interface CRUDService {
 
-    List<Map<String, String>> findAll(CollectionRequest colReq);
+    List<Map<String, String>> findAll(CollectionId colReq);
 
-    List<Map<String, String>> find(DocumentRequest docRequest);
+    List<Map<String, String>> find(DocumentId docRequest);
 
-    void save(CollectionRequest colReq, Map<String, String> document);
+    void save(CollectionId colReq, Map<String, String> document);
 
-    void update(DocumentRequest docReq, Map<String, String> updates);
+    void update(DocumentId docReq, Map<String, String> updates);
 
-    void delete(DocumentRequest docRequest);
+    void updateByIndexedProperty(DocumentId docReq, Map<String, String> updates);
+
+    void delete(DocumentId docRequest);
 
 }

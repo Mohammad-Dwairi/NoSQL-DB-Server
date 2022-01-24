@@ -1,6 +1,8 @@
 package com.atypon.nosqldbserver.exceptions;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -21,8 +23,9 @@ public class DBExceptionHandler {
         return new ResponseEntity<>(errorResponse, INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(value = {SchemaNotFoundException.class})
-    public ResponseEntity<Object> notFoundHandler(SchemaNotFoundException e) {
+    @ExceptionHandler(value = {SchemaNotFoundException.class, DBFileNotFoundException.class,
+            CollectionNotFoundException.class, DocumentNotFoundException.class})
+    public ResponseEntity<Object> notFoundHandler(RuntimeException e) {
         errorResponse.setStatus(NOT_FOUND.value());
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(currentTimeMillis());
@@ -35,5 +38,21 @@ public class DBExceptionHandler {
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(currentTimeMillis());
         return new ResponseEntity<>(errorResponse, CONFLICT);
+    }
+
+    @ExceptionHandler(value = {HttpMessageNotReadableException.class})
+    public ResponseEntity<Object> badRequest(RuntimeException e) {
+        errorResponse.setStatus(BAD_REQUEST.value());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setTimestamp(currentTimeMillis());
+        return new ResponseEntity<>(errorResponse, BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class})
+    public ResponseEntity<Object> notAllowed(Exception e) {
+        errorResponse.setStatus(METHOD_NOT_ALLOWED.value());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setTimestamp(currentTimeMillis());
+        return new ResponseEntity<>(errorResponse, METHOD_NOT_ALLOWED);
     }
 }

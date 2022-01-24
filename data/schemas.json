@@ -1,1 +1,1 @@
-[{"name":"grading_system","collections":[{"name":"students","schema":{"id":"number","name":"string"}}]}]
+[{"name":"grading_system","collections":[{"name":"students","schema":null}]}]
