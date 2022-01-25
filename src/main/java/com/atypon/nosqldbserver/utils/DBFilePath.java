@@ -1,7 +1,6 @@
 package com.atypon.nosqldbserver.utils;
 
 import com.atypon.nosqldbserver.request.CollectionId;
-import com.atypon.nosqldbserver.request.DocumentId;
 
 public class DBFilePath {
 
@@ -25,9 +24,5 @@ public class DBFilePath {
 
     public static String buildIndexesFilePath(CollectionId request) {
         return "./data/db/" + request.getSchemaName() + "/" + request.getCollectionName() + "_indexes.json";
-    }
-
-    public static String buildFragmentationTrackerFilePath(CollectionId collectionId) {
-        return "./data/db/" + collectionId.getSchemaName() + "/" + collectionId.getCollectionName() + "_frag.json";
     }
 }
