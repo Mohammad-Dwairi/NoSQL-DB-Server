@@ -1,6 +1,6 @@
 package com.atypon.nosqldbserver.exceptions;
 
-import org.everit.json.schema.ValidationException;
+import org.everit.json.schema.SchemaException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -33,7 +33,7 @@ public class DBExceptionHandler {
         return new ResponseEntity<>(errorResponse, NOT_FOUND);
     }
 
-    @ExceptionHandler(value = {SchemaAlreadyExistsException.class, CollectionAlreadyExistsException.class})
+    @ExceptionHandler(value = {SchemaAlreadyExistsException.class, CollectionAlreadyExistsException.class, UserAlreadyExistsException.class})
     public ResponseEntity<Object> conflictHandler(RuntimeException e) {
         errorResponse.setStatus(CONFLICT.value());
         errorResponse.setMessage(e.getMessage());
@@ -41,7 +41,7 @@ public class DBExceptionHandler {
         return new ResponseEntity<>(errorResponse, CONFLICT);
     }
 
-    @ExceptionHandler(value = {HttpMessageNotReadableException.class, JSONSchemaValidationException.class})
+    @ExceptionHandler(value = {HttpMessageNotReadableException.class, JSONSchemaValidationException.class, JWTException.class, SchemaException.class})
     public ResponseEntity<Object> badRequest(RuntimeException e) {
         errorResponse.setStatus(BAD_REQUEST.value());
         errorResponse.setMessage(e.getMessage());
@@ -52,6 +52,14 @@ public class DBExceptionHandler {
     @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class})
     public ResponseEntity<Object> notAllowed(Exception e) {
         errorResponse.setStatus(METHOD_NOT_ALLOWED.value());
+        errorResponse.setMessage(e.getMessage());
+        errorResponse.setTimestamp(currentTimeMillis());
+        return new ResponseEntity<>(errorResponse, METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(value = {AuthenticationException.class})
+    public ResponseEntity<Object> forbidden(Exception e) {
+        errorResponse.setStatus(FORBIDDEN.value());
         errorResponse.setMessage(e.getMessage());
         errorResponse.setTimestamp(currentTimeMillis());
         return new ResponseEntity<>(errorResponse, METHOD_NOT_ALLOWED);

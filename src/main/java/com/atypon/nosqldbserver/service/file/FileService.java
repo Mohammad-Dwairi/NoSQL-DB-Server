@@ -2,9 +2,9 @@ package com.atypon.nosqldbserver.service.file;
 
 public interface FileService {
 
-    void createFolders(String path);
+    boolean createFolders(String path);
 
-    void createFile(String path);
+    boolean createFile(String path);
 
     void deleteFile(String path);
 

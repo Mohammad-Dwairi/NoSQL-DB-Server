@@ -10,16 +10,16 @@ import java.io.IOException;
 public class FileServiceImpl implements FileService {
 
     @Override
-    public void createFolders(String path) {
+    public boolean createFolders(String path) {
         File file = new File(path);
-        file.mkdirs();
+        return file.mkdirs();
     }
 
     @Override
-    public void createFile(String path) {
+    public boolean createFile(String path) {
         try {
             File file = new File(path);
-            file.createNewFile();
+            return file.createNewFile();
         } catch (IOException e) {
             throw new FileCreationException(e.getMessage());
         }

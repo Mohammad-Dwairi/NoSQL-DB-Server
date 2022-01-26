@@ -25,4 +25,8 @@ public class DBFilePath {
     public static String buildIndexesFilePath(CollectionId request) {
         return "./data/db/" + request.getSchemaName() + "/" + request.getCollectionName() + "_indexes.json";
     }
+
+    public static String buildUsersFilePath() {
+        return "./data/users/users.json";
+    }
 }

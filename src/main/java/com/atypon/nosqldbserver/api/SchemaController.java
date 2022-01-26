@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/db")
+@RequestMapping("/db/schemas")
 @RequiredArgsConstructor
 public class SchemaController {
 
@@ -22,26 +22,28 @@ public class SchemaController {
         return schemaService.findAll();
     }
 
-    @GetMapping("/schemas/{schemaName}")
+    @GetMapping("/{schemaName}")
     public DBSchema findSchema(@PathVariable String schemaName) {
         return schemaService.find(schemaName).orElseThrow(SchemaNotFoundException::new);
     }
 
-    @GetMapping("/schemas/{schemaName}/export")
+    @GetMapping("{schemaName}/export")
     public void exportSchema(@PathVariable String schemaName, @RequestBody Map<String, String> req) {
         if (req.containsKey("path")) {
             schemaService.exportSchema(schemaName, req.get("path"));
         }
     }
 
-    @PostMapping("/schemas/import")
+    @PostMapping("/import")
     public void importSchema(@RequestBody DBSchema schema) {
         schemaService.importSchema(schema);
     }
 
     @PostMapping
     public void createSchema(@RequestBody Map<String, String> request) {
-        schemaService.create(request.get(SCHEMA_NAME));
+        if (request.containsKey(SCHEMA_NAME)) {
+            schemaService.create(request.get(SCHEMA_NAME));
+        }
     }
 
     @DeleteMapping
