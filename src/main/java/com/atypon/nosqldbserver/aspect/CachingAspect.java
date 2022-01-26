@@ -32,7 +32,9 @@ public class CachingAspect {
             return cachedData.get();
         }
         Object retrievedData = proceedingJoinPoint.proceed();
-        cache.put(query, retrievedData);
+        synchronized (cache) {
+            cache.put(query, retrievedData);
+        }
         log.info("RETURNING RETRIEVED DATA");
         return retrievedData;
     }
@@ -44,8 +46,10 @@ public class CachingAspect {
         IndexedDocument indexedDocument = (IndexedDocument) joinPoint.getArgs()[0];
         Pair<String, String> query = new Pair<>(indexedDocument.getIndexedPropertyName(), indexedDocument.getIndexedPropertyValue());
         Optional<Object> cachedData = cache.get(query);
-        if (cachedData.isPresent()) {
-           cache.drop(query);
+        synchronized (cache) {
+            if (cachedData.isPresent()) {
+                cache.drop(query);
+            }
         }
     }
 
