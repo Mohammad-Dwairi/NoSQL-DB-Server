@@ -5,10 +5,9 @@ import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
 import com.atypon.nosqldbserver.index.DBDefaultIndex;
-import com.atypon.nosqldbserver.request.CollectionId;
+import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.utils.DBFilePath;
-import com.atypon.nosqldbserver.utils.JSONUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,8 +1,8 @@
 package com.atypon.nosqldbserver.api;
 
 import com.atypon.nosqldbserver.core.DBDocument;
-import com.atypon.nosqldbserver.request.CollectionId;
-import com.atypon.nosqldbserver.request.DocumentId;
+import com.atypon.nosqldbserver.helper.CollectionId;
+import com.atypon.nosqldbserver.helper.IndexedDocument;
 import com.atypon.nosqldbserver.service.CRUDService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +18,7 @@ public class DocumentController {
 
     @GetMapping(params = {"property", "value"})
     public List<DBDocument> findByIndexedKey(CollectionId collectionId, @RequestParam String property, @RequestParam String value) {
-        DocumentId docReq = new DocumentId(collectionId, property, value);
+        IndexedDocument docReq = new IndexedDocument(collectionId, property, value);
         return crudService.findByIndexedProperty(docReq);
     }
 
@@ -35,8 +35,8 @@ public class DocumentController {
 
     @PutMapping(params = {"property", "value"})
     public void update(CollectionId collectionId, @RequestParam String property, @RequestParam String value, @RequestBody Object updates) {
-        DocumentId documentId = new DocumentId(collectionId, property, value);
-        crudService.updateByIndexedProperty(documentId, updates);
+        IndexedDocument indexedDocument = new IndexedDocument(collectionId, property, value);
+        crudService.updateByIndexedProperty(indexedDocument, updates);
     }
 
     @PutMapping("/{docId}")
@@ -51,6 +51,6 @@ public class DocumentController {
 
     @DeleteMapping(params = {"property", "value"})
     public void delete(CollectionId colReq, @RequestParam String property, @RequestParam String value) {
-        crudService.deleteByIndexedProperty(new DocumentId(colReq, property, value));
+        crudService.deleteByIndexedProperty(new IndexedDocument(colReq, property, value));
     }
 }

@@ -1,7 +1,7 @@
 package com.atypon.nosqldbserver.api;
 
 import com.atypon.nosqldbserver.core.DBCollection;
-import com.atypon.nosqldbserver.request.CollectionId;
+import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.service.collection.CollectionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

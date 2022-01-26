@@ -2,11 +2,9 @@ package com.atypon.nosqldbserver.service.documents;
 
 import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
-import com.atypon.nosqldbserver.request.CollectionId;
-import com.atypon.nosqldbserver.request.DocumentId;
+import com.atypon.nosqldbserver.helper.CollectionId;
 
 import java.util.List;
-import java.util.Map;
 
 public interface DocumentService {
     List<DBDocument> findAll(CollectionId collectionId);

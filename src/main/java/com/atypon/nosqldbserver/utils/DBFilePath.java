@@ -1,6 +1,6 @@
 package com.atypon.nosqldbserver.utils;
 
-import com.atypon.nosqldbserver.request.CollectionId;
+import com.atypon.nosqldbserver.helper.CollectionId;
 
 public class DBFilePath {
 

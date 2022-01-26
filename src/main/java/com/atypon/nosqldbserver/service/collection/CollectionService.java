@@ -1,8 +1,8 @@
 package com.atypon.nosqldbserver.service.collection;
 
 import com.atypon.nosqldbserver.core.DBCollection;
-import com.atypon.nosqldbserver.request.CollectionId;
-import com.atypon.nosqldbserver.request.Pair;
+import com.atypon.nosqldbserver.helper.CollectionId;
+import com.atypon.nosqldbserver.helper.Pair;
 
 import java.util.List;
 import java.util.Optional;

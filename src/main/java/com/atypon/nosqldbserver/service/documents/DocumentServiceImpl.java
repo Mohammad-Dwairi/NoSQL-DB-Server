@@ -4,7 +4,7 @@ import com.atypon.nosqldbserver.access.DBFileAccess;
 import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
-import com.atypon.nosqldbserver.request.CollectionId;
+import com.atypon.nosqldbserver.helper.CollectionId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

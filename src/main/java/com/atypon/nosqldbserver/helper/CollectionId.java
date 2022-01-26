@@ -1,4 +1,4 @@
-package com.atypon.nosqldbserver.request;
+package com.atypon.nosqldbserver.helper;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

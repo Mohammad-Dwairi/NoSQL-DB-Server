@@ -6,9 +6,9 @@ import com.atypon.nosqldbserver.exceptions.CollectionNotFoundException;
 import com.atypon.nosqldbserver.exceptions.DocumentNotFoundException;
 import com.atypon.nosqldbserver.index.DBDefaultIndex;
 import com.atypon.nosqldbserver.index.DBRequestedIndex;
-import com.atypon.nosqldbserver.request.CollectionId;
-import com.atypon.nosqldbserver.request.DocumentId;
-import com.atypon.nosqldbserver.request.Pair;
+import com.atypon.nosqldbserver.helper.CollectionId;
+import com.atypon.nosqldbserver.helper.IndexedDocument;
+import com.atypon.nosqldbserver.helper.Pair;
 import com.atypon.nosqldbserver.service.collection.CollectionService;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.service.index.IndexService;
@@ -43,16 +43,16 @@ public class CRUDServiceImpl implements CRUDService {
     }
 
     @Override
-    public List<DBDocument> findByIndexedProperty(DocumentId documentId) {
-        final String defaultIndexPath = buildDefaultIndexPath(documentId.getCollectionId());
-        List<String> pointers = extractRequestedData(documentId);
+    public List<DBDocument> findByIndexedProperty(IndexedDocument indexedDocument) {
+        final String defaultIndexPath = buildDefaultIndexPath(indexedDocument.getCollectionId());
+        List<String> pointers = extractRequestedData(indexedDocument);
         if (!pointers.isEmpty()) {
             final DBDefaultIndex defaultIndex = new DBDefaultIndex(defaultIndexPath);
             List<DBDocumentLocation> locations = defaultIndex.get(pointers);
             if (locations == null) {
                 locations = new ArrayList<>();
             }
-            return documentService.findAll(documentId.getCollectionId(), locations);
+            return documentService.findAll(indexedDocument.getCollectionId(), locations);
         }
         return Collections.emptyList();
     }
@@ -73,10 +73,10 @@ public class CRUDServiceImpl implements CRUDService {
     }
 
     @Override
-    public void updateByIndexedProperty(DocumentId documentId, Object updatedDocument) {
-        List<String> updatedPointers = extractRequestedData(documentId);
+    public void updateByIndexedProperty(IndexedDocument indexedDocument, Object updatedDocument) {
+        List<String> updatedPointers = extractRequestedData(indexedDocument);
         updatedPointers.forEach(pointer -> {
-            updateByDefaultId(documentId.getCollectionId(), new DBDocument(pointer, updatedDocument));
+            updateByDefaultId(indexedDocument.getCollectionId(), new DBDocument(pointer, updatedDocument));
         });
     }
 
@@ -86,15 +86,15 @@ public class CRUDServiceImpl implements CRUDService {
     }
 
     @Override
-    public void deleteByIndexedProperty(DocumentId documentId) {
-        List<String> deletedPointers = extractRequestedData(documentId);
-        deletedPointers.forEach(pointer -> deleteByDefaultId(documentId.getCollectionId(), pointer));
+    public void deleteByIndexedProperty(IndexedDocument indexedDocument) {
+        List<String> deletedPointers = extractRequestedData(indexedDocument);
+        deletedPointers.forEach(pointer -> deleteByDefaultId(indexedDocument.getCollectionId(), pointer));
     }
 
-    private List<String> extractRequestedData(DocumentId documentId) {
-        final String indexedPropertyValue = documentId.getIndexedPropertyValue();
-        final CollectionId collectionId = documentId.getCollectionId();
-        final String requestedIndexPath = buildRequestedIndexPath(collectionId, documentId.getIndexedPropertyName());
+    private List<String> extractRequestedData(IndexedDocument indexedDocument) {
+        final String indexedPropertyValue = indexedDocument.getIndexedPropertyValue();
+        final CollectionId collectionId = indexedDocument.getCollectionId();
+        final String requestedIndexPath = buildRequestedIndexPath(collectionId, indexedDocument.getIndexedPropertyName());
         DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
         return requestedIndex.get(indexedPropertyValue).orElse(new ArrayList<>());
     }

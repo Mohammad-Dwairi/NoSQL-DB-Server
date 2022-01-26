@@ -1,6 +1,5 @@
-package com.atypon.nosqldbserver.request;
+package com.atypon.nosqldbserver.helper;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,10 +16,5 @@ public class Pair<K, V> {
     public Pair(K key, V value) {
         this.key = key;
         this.value = value;
-    }
-
-    @JsonIgnore
-    public boolean isEmpty() {
-        return this.key == null && this.value == null;
     }
 }

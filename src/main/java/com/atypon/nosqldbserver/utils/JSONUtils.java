@@ -14,7 +14,7 @@ public class JSONUtils {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public static boolean isValidJSON(String jsonString) { // NOT WORKING :(
+    public static boolean isValidJSON(String jsonString) {
         try {
             mapper.readTree(jsonString);
             return true;

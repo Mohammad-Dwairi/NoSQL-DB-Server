@@ -1,8 +1,8 @@
 package com.atypon.nosqldbserver.aspect;
 
 import com.atypon.nosqldbserver.cache.LRUCache;
-import com.atypon.nosqldbserver.request.DocumentId;
-import com.atypon.nosqldbserver.request.Pair;
+import com.atypon.nosqldbserver.helper.IndexedDocument;
+import com.atypon.nosqldbserver.helper.Pair;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -24,8 +24,8 @@ public class CachingAspect {
 
     @Around("execution(* com.atypon.nosqldbserver.service.CRUDService.findByIndexedProperty(..))")
     public Object aroundFind(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        DocumentId documentId = (DocumentId) proceedingJoinPoint.getArgs()[0];
-        Pair<String, String> query = new Pair<>(documentId.getIndexedPropertyName(), documentId.getIndexedPropertyValue());
+        IndexedDocument indexedDocument = (IndexedDocument) proceedingJoinPoint.getArgs()[0];
+        Pair<String, String> query = new Pair<>(indexedDocument.getIndexedPropertyName(), indexedDocument.getIndexedPropertyValue());
         Optional<Object> cachedData = cache.get(query);
         if (cachedData.isPresent()) {
             log.info("RETURNING CACHED DATA");
@@ -41,8 +41,8 @@ public class CachingAspect {
     @Before("execution(* com.atypon.nosqldbserver.service.CRUDService.*IndexedProperty(..)))")
     public void beforeUpdateOrUpdate(JoinPoint joinPoint) {
         log.info("BEFORE UPDATE OR DELETE");
-        DocumentId documentId = (DocumentId) joinPoint.getArgs()[0];
-        Pair<String, String> query = new Pair<>(documentId.getIndexedPropertyName(), documentId.getIndexedPropertyValue());
+        IndexedDocument indexedDocument = (IndexedDocument) joinPoint.getArgs()[0];
+        Pair<String, String> query = new Pair<>(indexedDocument.getIndexedPropertyName(), indexedDocument.getIndexedPropertyValue());
         Optional<Object> cachedData = cache.get(query);
         if (cachedData.isPresent()) {
            cache.drop(query);
