@@ -1,12 +1,12 @@
 package com.atypon.nosqldbserver.service.schema;
 
+import com.atypon.nosqldbserver.access.DBFileAccess;
+import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBSchema;
 import com.atypon.nosqldbserver.exceptions.JSONParseException;
 import com.atypon.nosqldbserver.exceptions.SchemaAlreadyExistsException;
 import com.atypon.nosqldbserver.exceptions.SchemaNotFoundException;
 import com.atypon.nosqldbserver.service.file.FileService;
-import com.atypon.nosqldbserver.utils.DBFileReader;
-import com.atypon.nosqldbserver.utils.DBFileWriter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +35,8 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<DBSchema> findAll() {
         if (fileService.exists(schemasFilePath)) {
-            String schemasJSONList = DBFileReader.read(schemasFilePath);
+            DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(schemasFilePath);
+            String schemasJSONList = fileAccess.read();
             ObjectMapper mapper = new ObjectMapper();
             try {
                 return mapper.readValue(schemasJSONList, new TypeReference<>() {
@@ -83,7 +84,8 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public void writeToSchemaFile(List<DBSchema> schemas) {
-        DBFileWriter.clear(schemasFilePath);
-        DBFileWriter.write(convertToJSON(schemas), schemasFilePath);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(schemasFilePath);
+        fileAccess.clear();
+        fileAccess.write(convertToJSON(schemas));
     }
 }

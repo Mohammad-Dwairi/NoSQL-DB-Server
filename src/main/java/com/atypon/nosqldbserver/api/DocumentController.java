@@ -19,12 +19,12 @@ public class DocumentController {
     @GetMapping(params = {"property", "value"})
     public List<Map<String, String>> findByIndexedKey(CollectionId collectionId, @RequestParam String property, @RequestParam String value) {
         DocumentId docReq = new DocumentId(collectionId, property, value);
-        return crudService.find(docReq);
+        return crudService.findByIndexedProperty(docReq);
     }
 
     @GetMapping
     public List<Map<String, String>> findAll(CollectionId request) {
-        return crudService.findAll(request);
+        return crudService.findByDefaultId(request);
     }
 
     @PostMapping
@@ -41,12 +41,12 @@ public class DocumentController {
     @PutMapping("/{docId}")
     public void update(CollectionId collectionId, @RequestBody Map<String, String> updates, @PathVariable String docId) {
         DocumentId req = new DocumentId(collectionId, "_$id", docId);
-        crudService.update(req, updates);
+        crudService.updateByDefaultId(req, updates);
     }
 
     @DeleteMapping("/{docId}")
     public void delete(CollectionId colReq, @PathVariable String docId) {
-        crudService.delete(new DocumentId(colReq, "_$id", docId));
+        crudService.deleteByDefaultId(new DocumentId(colReq, "_$id", docId));
     }
 
     @DeleteMapping(params = {"property", "value"})

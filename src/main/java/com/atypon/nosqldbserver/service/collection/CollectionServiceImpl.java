@@ -1,5 +1,7 @@
 package com.atypon.nosqldbserver.service.collection;
 
+import com.atypon.nosqldbserver.access.DBFileAccess;
+import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBCollection;
 import com.atypon.nosqldbserver.core.DBSchema;
 import com.atypon.nosqldbserver.exceptions.CollectionAlreadyExistsException;
@@ -13,9 +15,6 @@ import com.atypon.nosqldbserver.request.Pair;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.service.file.FileService;
 import com.atypon.nosqldbserver.service.schema.SchemaService;
-import com.atypon.nosqldbserver.utils.DBFileReader;
-import com.atypon.nosqldbserver.utils.DBFileWriter;
-import com.atypon.nosqldbserver.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +24,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.*;
+import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 
 @Service
 @RequiredArgsConstructor
@@ -81,14 +81,16 @@ public class CollectionServiceImpl implements CollectionService {
             if (find(collectionId).isPresent()) {
                 String requestedIndexPath = createRequestedIndexFile(collectionId, indexedPropertyName);
                 String registeredIndexesFile = createRegisteredIndexesFile(collectionId);
-                String registeredIndexesJSON = DBFileReader.read(registeredIndexesFile);
+                DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(registeredIndexesFile);
+                String registeredIndexesJSON = fileAccess.read();
                 List<Pair<String, String>> registeredIndexes = new ArrayList<>();
                 if (!registeredIndexesJSON.isBlank()) {
                     registeredIndexes = new ObjectMapper().readValue(registeredIndexesJSON, new TypeReference<>() {
                     });
                 }
                 registeredIndexes.add(new Pair<>(indexedPropertyName, requestedIndexPath));
-                DBFileWriter.clearAndWrite(JSONUtils.convertToJSON(registeredIndexes), registeredIndexesFile);
+                fileAccess.clear();
+                fileAccess.write(convertToJSON(registeredIndexes));
                 recoverExistingDocuments(collectionId, indexedPropertyName);
             }
         } catch (IOException e) {
@@ -99,7 +101,8 @@ public class CollectionServiceImpl implements CollectionService {
     @Override
     public List<Pair<String, String>> getRegisteredIndexes(CollectionId collectionId) {
         final String registeredIndexesFile = createRegisteredIndexesFile(collectionId);
-        String indexesJSON = DBFileReader.read(registeredIndexesFile);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(registeredIndexesFile);
+        String indexesJSON = fileAccess.read();
         if (!indexesJSON.isBlank()) {
             try {
                 return new ObjectMapper().readValue(indexesJSON, new TypeReference<>() {
@@ -120,7 +123,9 @@ public class CollectionServiceImpl implements CollectionService {
         requestedIndex.clear();
         List<Map<String, String>> docs = documentService.findAll(collectionId, defaultIndex.values());
         docs.forEach(doc -> requestedIndex.add(doc.get(indexedPropertyName), doc.get("_$id")));
-        DBFileWriter.clearAndWrite(requestedIndex.toJSON(), requestedIndexPath);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(requestedIndexPath);
+        fileAccess.clear();
+        fileAccess.write(requestedIndex.toJSON());
     }
 
     private String createRequestedIndexFile(CollectionId collectionId, String indexedPropertyName) {

@@ -1,12 +1,11 @@
 package com.atypon.nosqldbserver.service.documents;
 
+import com.atypon.nosqldbserver.access.DBFileAccess;
+import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
 import com.atypon.nosqldbserver.exceptions.JSONParseException;
 import com.atypon.nosqldbserver.request.CollectionId;
 import com.atypon.nosqldbserver.request.DocumentId;
-import com.atypon.nosqldbserver.utils.DBFileReader;
-import com.atypon.nosqldbserver.utils.DBFileWriter;
-import com.atypon.nosqldbserver.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.buildCollectionPath;
+import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
+import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSONList;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -26,14 +27,16 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public List<String> findAll(CollectionId collectionId) {
         final String collectionPath = buildCollectionPath(collectionId);
-        return DBFileReader.readLines(collectionPath);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
+        return fileAccess.readLines();
     }
 
     @Override
     public List<Map<String, String>> findAll(CollectionId collectionId, List<DBDocumentLocation> locations) {
         ObjectMapper mapper = new ObjectMapper();
         String collectionPath = buildCollectionPath(collectionId);
-        List<String> documentsStringList = DBFileReader.readMultiple(collectionPath, locations);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
+        List<String> documentsStringList = fileAccess.read(locations);
         return documentsStringList.stream().map(doc -> {
             try {
                 return mapper.readValue(doc, new TypeReference<LinkedHashMap<String, String>>() {
@@ -48,7 +51,8 @@ public class DocumentServiceImpl implements DocumentService {
     public Map<String, String> find(CollectionId collectionId, DBDocumentLocation location) {
         final String collectionPath = buildCollectionPath(collectionId);
         final ObjectMapper mapper = new ObjectMapper();
-        String documentJSON = DBFileReader.readAt(collectionPath, location);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
+        String documentJSON = fileAccess.read(location);
         try {
             return mapper.readValue(documentJSON, new TypeReference<>() {
             });
@@ -60,14 +64,16 @@ public class DocumentServiceImpl implements DocumentService {
     @Override
     public DBDocumentLocation save(CollectionId collectionId, Map<String, String> document) {
         String collectionPath = buildCollectionPath(collectionId);
-        return DBFileWriter.write(JSONUtils.convertToJSON(document), collectionPath);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
+        return fileAccess.write(convertToJSON(document));
     }
 
     @Override
     public List<DBDocumentLocation> saveAll(CollectionId collectionId, List<Map<String, String>> document) {
         String collectionPath = buildCollectionPath(collectionId);
-        List<String> docsJSON = JSONUtils.convertToJSONList(document);
-        return DBFileWriter.writeMultiple(docsJSON, collectionPath);
+        List<String> docsJSON = convertToJSONList(document);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
+        return fileAccess.write(docsJSON);
     }
 
     @Override

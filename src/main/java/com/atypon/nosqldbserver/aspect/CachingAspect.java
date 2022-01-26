@@ -22,7 +22,7 @@ public class CachingAspect {
 
     private final LRUCache<Pair<String, String>, Object> cache;
 
-    @Around("execution(* com.atypon.nosqldbserver.service.CRUDService.find(..))")
+    @Around("execution(* com.atypon.nosqldbserver.service.CRUDService.findByIndexedProperty(..))")
     public Object aroundFind(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         DocumentId documentId = (DocumentId) proceedingJoinPoint.getArgs()[0];
         Pair<String, String> query = new Pair<>(documentId.getIndexedPropertyName(), documentId.getIndexedPropertyValue());

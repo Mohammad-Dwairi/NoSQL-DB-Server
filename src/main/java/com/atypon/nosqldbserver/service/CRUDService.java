@@ -8,17 +8,17 @@ import java.util.Map;
 
 public interface CRUDService {
 
-    List<Map<String, String>> findAll(CollectionId colReq);
+    List<Map<String, String>> findByDefaultId(CollectionId colReq);
 
-    List<Map<String, String>> find(DocumentId docRequest);
+    List<Map<String, String>> findByIndexedProperty(DocumentId docRequest);
 
     void save(CollectionId colReq, Map<String, String> document);
 
-    void update(DocumentId docReq, Map<String, String> updates);
+    void updateByDefaultId(DocumentId docReq, Map<String, String> updates);
 
     void updateByIndexedProperty(DocumentId docReq, Map<String, String> updates);
 
-    void delete(DocumentId docRequest);
+    void deleteByDefaultId(DocumentId docRequest);
 
     void deleteByIndexedProperty(DocumentId documentId);
 

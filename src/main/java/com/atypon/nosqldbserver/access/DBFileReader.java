@@ -1,6 +1,8 @@
-package com.atypon.nosqldbserver.utils;
+package com.atypon.nosqldbserver.access;
 
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -9,9 +11,10 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DBFileReader {
 
-    public static String read(String filePath) {
+    static String read(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             StringBuilder content = new StringBuilder();
             String line;
@@ -25,21 +28,7 @@ public class DBFileReader {
         }
     }
 
-    public static List<String> readLines(String filePath) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            List<String> lines = new ArrayList<>();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-            return lines;
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    public static String readAt(String filePath, DBDocumentLocation location) {
+    static String read(DBDocumentLocation location, String filePath) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
             raf.seek(location.getStartByte());
             byte[] buffer = new byte[(int) (location.getEndByte() - location.getStartByte())];
@@ -51,7 +40,7 @@ public class DBFileReader {
         }
     }
 
-    public static List<String> readMultiple(String filePath, List<DBDocumentLocation> locations) {
+    static List<String> read(List<DBDocumentLocation> locations, String filePath) {
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "r")) {
             List<String> matches = new ArrayList<>();
             for (DBDocumentLocation location : locations) {
@@ -61,6 +50,20 @@ public class DBFileReader {
                 matches.add(new String(buffer));
             }
             return matches;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    static List<String> readLines(String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            List<String> lines = new ArrayList<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+            return lines;
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
