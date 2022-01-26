@@ -1,6 +1,7 @@
 package com.atypon.nosqldbserver.api;
 
 import com.atypon.nosqldbserver.core.DBSchema;
+import com.atypon.nosqldbserver.exceptions.SchemaNotFoundException;
 import com.atypon.nosqldbserver.service.schema.SchemaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,23 @@ public class SchemaController {
     @GetMapping
     public List<DBSchema> findAllSchemas() {
         return schemaService.findAll();
+    }
+
+    @GetMapping("/schemas/{schemaName}")
+    public DBSchema findSchema(@PathVariable String schemaName) {
+        return schemaService.find(schemaName).orElseThrow(SchemaNotFoundException::new);
+    }
+
+    @GetMapping("/schemas/{schemaName}/export")
+    public void exportSchema(@PathVariable String schemaName, @RequestBody Map<String, String> req) {
+        if (req.containsKey("path")) {
+            schemaService.exportSchema(schemaName, req.get("path"));
+        }
+    }
+
+    @PostMapping("/schemas/import")
+    public void importSchema(@RequestBody DBSchema schema) {
+        schemaService.importSchema(schema);
     }
 
     @PostMapping

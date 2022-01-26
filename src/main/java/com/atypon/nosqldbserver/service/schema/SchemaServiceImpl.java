@@ -2,10 +2,12 @@ package com.atypon.nosqldbserver.service.schema;
 
 import com.atypon.nosqldbserver.access.DBFileAccess;
 import com.atypon.nosqldbserver.access.DBFileAccessPool;
+import com.atypon.nosqldbserver.core.DBCollection;
 import com.atypon.nosqldbserver.core.DBSchema;
 import com.atypon.nosqldbserver.exceptions.JSONParseException;
 import com.atypon.nosqldbserver.exceptions.SchemaAlreadyExistsException;
 import com.atypon.nosqldbserver.exceptions.SchemaNotFoundException;
+import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.service.file.FileService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.atypon.nosqldbserver.utils.DBFilePath.buildSchemaPath;
+import static com.atypon.nosqldbserver.utils.DBFilePath.*;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 
 @Service
@@ -80,6 +82,29 @@ public class SchemaServiceImpl implements SchemaService {
         } else {
             throw new SchemaNotFoundException();
         }
+    }
+
+    @Override
+    public void importSchema(DBSchema schema) {
+        fileService.createFolders(buildSchemaPath(schema.getName()));
+        List<DBCollection> collections = schema.getCollections();
+        collections.forEach(col -> {
+            CollectionId collectionId = new CollectionId(schema.getName(), col.getName());
+            fileService.createFile(buildCollectionPath(collectionId));
+            fileService.createFile(buildDefaultIndexPath(collectionId));
+        });
+        List<DBSchema> schemas = findAll();
+        schemas.add(schema);
+        writeToSchemaFile(schemas);
+    }
+
+    @Override
+    public void exportSchema(String schemaName, String targetFilePath) {
+        DBSchema schema = find(schemaName).orElseThrow(SchemaNotFoundException::new);
+        String schemaJSON = convertToJSON(schema);
+        fileService.createFile(targetFilePath);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(targetFilePath);
+        fileAccess.write(schemaJSON);
     }
 
     @Override

@@ -15,6 +15,10 @@ public interface SchemaService {
 
     void drop(String name);
 
+    void importSchema(DBSchema schema);
+
+    void exportSchema(String schemaName, String targetFilePath);
+
     void writeToSchemaFile(List<DBSchema> schemas);
 
 }
