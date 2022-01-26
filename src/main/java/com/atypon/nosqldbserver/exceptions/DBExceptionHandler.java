@@ -1,5 +1,6 @@
 package com.atypon.nosqldbserver.exceptions;
 
+import org.everit.json.schema.ValidationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -40,7 +41,7 @@ public class DBExceptionHandler {
         return new ResponseEntity<>(errorResponse, CONFLICT);
     }
 
-    @ExceptionHandler(value = {HttpMessageNotReadableException.class})
+    @ExceptionHandler(value = {HttpMessageNotReadableException.class, JSONSchemaValidationException.class})
     public ResponseEntity<Object> badRequest(RuntimeException e) {
         errorResponse.setStatus(BAD_REQUEST.value());
         errorResponse.setMessage(e.getMessage());

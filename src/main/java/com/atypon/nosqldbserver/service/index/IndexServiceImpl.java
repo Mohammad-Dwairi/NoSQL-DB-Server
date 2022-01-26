@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.buildDefaultIndexPath;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
@@ -66,7 +67,7 @@ public class IndexServiceImpl implements IndexService {
         for (Pair<String, String> ri : registeredIndexes) {
             DBRequestedIndex requestedIndex = new DBRequestedIndex(ri.getValue());
             Map<String, Object> docMap = JSONUtils.convertToObjectMap(convertToJSON(updatedDoc.getDocument()));
-            final String key = (String) docMap.get(ri.getKey());
+            final String key = Objects.toString(docMap.get(ri.getKey()));
             requestedIndex.add(key, updatedDoc.getDefaultId());
             writeIndex(requestedIndex);
         }
