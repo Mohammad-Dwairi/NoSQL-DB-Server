@@ -3,6 +3,7 @@ package com.atypon.nosqldbserver.service.collection;
 import com.atypon.nosqldbserver.access.DBFileAccess;
 import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBCollection;
+import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.core.DBSchema;
 import com.atypon.nosqldbserver.exceptions.CollectionAlreadyExistsException;
 import com.atypon.nosqldbserver.exceptions.CollectionNotFoundException;
@@ -25,6 +26,7 @@ import java.util.*;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.*;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
+import static com.atypon.nosqldbserver.utils.JSONUtils.convertToObjectMap;
 
 @Service
 @RequiredArgsConstructor
@@ -121,8 +123,13 @@ public class CollectionServiceImpl implements CollectionService {
         DBDefaultIndex defaultIndex = new DBDefaultIndex(defaultIndexPath);
         DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
         requestedIndex.clear();
-        List<Map<String, String>> docs = documentService.findAll(collectionId, defaultIndex.values());
-        docs.forEach(doc -> requestedIndex.add(doc.get(indexedPropertyName), doc.get("_$id")));
+        List<DBDocument> docs = documentService.findAll(collectionId, defaultIndex.values());
+
+        docs.forEach(doc -> {
+            Map<String, Object> docMap = convertToObjectMap(convertToJSON(doc.getDocument()));
+            requestedIndex.add(docMap.get(indexedPropertyName), doc.getDefaultId());
+        });
+
         DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(requestedIndexPath);
         fileAccess.clear();
         fileAccess.write(requestedIndex.toJSON());

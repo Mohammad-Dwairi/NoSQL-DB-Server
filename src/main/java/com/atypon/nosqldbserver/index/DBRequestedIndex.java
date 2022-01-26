@@ -15,13 +15,13 @@ import java.util.List;
 
 import static com.atypon.nosqldbserver.utils.JSONUtils.isValidJSON;
 
-public class DBRequestedIndex extends DBIndex<String, List<String>> {
+public class DBRequestedIndex extends DBIndex<Object, List<String>> {
 
     public DBRequestedIndex(String path) {
         super(path, load(path));
     }
 
-    public void add(String key, String value) {
+    public void add(Object key, String value) {
         if (super.indexMap.containsKey(key)) {
             this.indexMap.get(key).add(value);
         } else {
@@ -35,25 +35,8 @@ public class DBRequestedIndex extends DBIndex<String, List<String>> {
         super.indexMap.clear();
     }
 
-    public void remove(String key, String value) {
-        List<String> postingList = indexMap.get(key);
-        if (postingList != null) {
-            postingList.remove(value);
-        }
-    }
 
-    public void remove(String key, List<String> values) {
-        List<String> postingList = indexMap.get(key);
-        if (postingList != null) {
-            postingList.removeIf(values::contains);
-            if (postingList.isEmpty()) {
-                super.drop(key);
-            }
-        }
-
-    }
-
-    private static LinkedHashMap<String, List<String>> load(String path) {
+    private static LinkedHashMap<Object, List<String>> load(String path) {
         if (!new File(path).exists()) {
             throw new DBFileNotFoundException("Index file " + path + " not found");
         }

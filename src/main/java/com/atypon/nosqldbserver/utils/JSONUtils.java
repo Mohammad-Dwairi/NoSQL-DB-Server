@@ -1,5 +1,8 @@
 package com.atypon.nosqldbserver.utils;
 
+import com.atypon.nosqldbserver.core.DBDocument;
+import com.atypon.nosqldbserver.exceptions.JSONParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -20,7 +23,7 @@ public class JSONUtils {
         }
     }
 
-    public static List<String> convertToJSONList(List<Map<String, String>> list) {
+    public static List<String> convertToJSONList(List<Object> list) {
         return list.stream().map(item -> {
             try {
                 return mapper.writeValueAsString(item);
@@ -37,5 +40,26 @@ public class JSONUtils {
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public static Map<String, Object> convertToObjectMap(String docJSON) {
+        try {
+            return mapper.readValue(docJSON, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new JSONParseException(e.getMessage());
+        }
+    }
+
+    public static DBDocument convertToDBDocument(String docJSON) {
+        try {
+            return mapper.readValue(docJSON, DBDocument.class);
+        } catch (IOException e) {
+            throw new JSONParseException(e.getMessage());
+        }
+    }
+
+    public static List<DBDocument> convertToDBDocumentList(List<String> docJSONList) {
+        return docJSONList.stream().map(JSONUtils::convertToDBDocument).collect(Collectors.toList());
     }
 }

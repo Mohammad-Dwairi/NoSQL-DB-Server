@@ -1,24 +1,24 @@
 package com.atypon.nosqldbserver.service;
 
+import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.request.CollectionId;
 import com.atypon.nosqldbserver.request.DocumentId;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CRUDService {
 
-    List<Map<String, String>> findByDefaultId(CollectionId colReq);
+    List<DBDocument> findByDefaultId(CollectionId collectionId);
 
-    List<Map<String, String>> findByIndexedProperty(DocumentId docRequest);
+    List<DBDocument> findByIndexedProperty(DocumentId documentId);
 
-    void save(CollectionId colReq, Map<String, String> document);
+    void save(CollectionId collectionId, Object document);
 
-    void updateByDefaultId(DocumentId docReq, Map<String, String> updates);
+    void updateByDefaultId(CollectionId collectionId, DBDocument updatedDocument);
 
-    void updateByIndexedProperty(DocumentId docReq, Map<String, String> updates);
+    void updateByIndexedProperty(DocumentId documentId, Object updatedDocument);
 
-    void deleteByDefaultId(DocumentId docRequest);
+    void deleteByDefaultId(CollectionId collectionId, String defaultId);
 
     void deleteByIndexedProperty(DocumentId documentId);
 

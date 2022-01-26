@@ -2,6 +2,7 @@ package com.atypon.nosqldbserver.service.index;
 
 import com.atypon.nosqldbserver.access.DBFileAccess;
 import com.atypon.nosqldbserver.access.DBFileAccessPool;
+import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
 import com.atypon.nosqldbserver.index.DBDefaultIndex;
 import com.atypon.nosqldbserver.index.DBIndex;
@@ -10,6 +11,7 @@ import com.atypon.nosqldbserver.request.CollectionId;
 import com.atypon.nosqldbserver.request.Pair;
 import com.atypon.nosqldbserver.service.collection.CollectionService;
 import com.atypon.nosqldbserver.service.defragmentation.DefragmentationService;
+import com.atypon.nosqldbserver.utils.JSONUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.buildDefaultIndexPath;
+import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 
 @Service
 @RequiredArgsConstructor
@@ -26,18 +29,18 @@ public class IndexServiceImpl implements IndexService {
     private final DefragmentationService defragmentationService;
 
     @Override
-    public void save(CollectionId collectionId, Pair<Map<String, String>, DBDocumentLocation> docLocation) {
+    public void save(CollectionId collectionId, Pair<DBDocument, DBDocumentLocation> docLocationPair) {
         DBDefaultIndex defaultIndex = new DBDefaultIndex(buildDefaultIndexPath(collectionId));
-        defaultIndex.put(docLocation.getKey().get("_$id"), docLocation.getValue());
+        defaultIndex.put(docLocationPair.getKey().getDefaultId(), docLocationPair.getValue());
         writeIndex(defaultIndex);
-        updateRegisteredIndexes(collectionId, docLocation.getKey());
+        updateRegisteredIndexes(collectionId, docLocationPair.getKey());
         defragmentationService.update(collectionId, defaultIndex.size());
     }
 
     @Override
-    public void update(CollectionId collectionId, Pair<String, DBDocumentLocation> updates) {
+    public void update(CollectionId collectionId, Pair<DBDocument, DBDocumentLocation> docLocationPair) {
         DBDefaultIndex defaultIndex = new DBDefaultIndex(buildDefaultIndexPath(collectionId));
-        defaultIndex.put(updates.getKey(), updates.getValue());
+        defaultIndex.put(docLocationPair.getKey().getDefaultId(), docLocationPair.getValue());
         writeIndex(defaultIndex);
         reIndexRegisteredIndexes(collectionId);
         defragmentationService.update(collectionId, defaultIndex.size());
@@ -58,13 +61,13 @@ public class IndexServiceImpl implements IndexService {
         });
     }
 
-    private void updateRegisteredIndexes(CollectionId collectionId, Map<String, String> updatedDoc) {
-        final String defaultId = updatedDoc.get("_$id");
+    private void updateRegisteredIndexes(CollectionId collectionId, DBDocument updatedDoc) {
         List<Pair<String, String>> registeredIndexes = collectionService.getRegisteredIndexes(collectionId);
         for (Pair<String, String> ri : registeredIndexes) {
             DBRequestedIndex requestedIndex = new DBRequestedIndex(ri.getValue());
-            final String key = updatedDoc.get(ri.getKey());
-            requestedIndex.add(key, defaultId);
+            Map<String, Object> docMap = JSONUtils.convertToObjectMap(convertToJSON(updatedDoc.getDocument()));
+            final String key = (String) docMap.get(ri.getKey());
+            requestedIndex.add(key, updatedDoc.getDefaultId());
             writeIndex(requestedIndex);
         }
     }
