@@ -6,6 +6,8 @@ public interface FileService {
 
     boolean createFile(String path);
 
+    void deleteFolders(String path);
+
     void deleteFile(String path);
 
     boolean exists(String path);

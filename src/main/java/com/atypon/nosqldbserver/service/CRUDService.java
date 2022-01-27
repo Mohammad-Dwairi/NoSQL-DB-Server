@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CRUDService {
 
-    List<DBDocument> findByDefaultId(CollectionId collectionId);
+    List<DBDocument> findAllByDefaultIndex(CollectionId collectionId);
 
     List<DBDocument> findByIndexedProperty(IndexedDocument indexedDocument);
 

@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.atypon.nosqldbserver.utils.DBFilePath.buildDefaultIndexPath;
-import static com.atypon.nosqldbserver.utils.DBFilePath.buildRequestedIndexPath;
+import static com.atypon.nosqldbserver.utils.DBFilePath.getDefaultIndexPath;
+import static com.atypon.nosqldbserver.utils.DBFilePath.getRequestedIndexPath;
 
 @Service
 @RequiredArgsConstructor
@@ -33,9 +33,9 @@ public class CRUDServiceImpl implements CRUDService {
     private final IndexService indexService;
 
     @Override
-    public List<DBDocument> findByDefaultId(CollectionId collectionId) {
+    public List<DBDocument> findAllByDefaultIndex(CollectionId collectionId) {
         if (collectionService.find(collectionId).isPresent()) {
-            String indexPath = buildDefaultIndexPath(collectionId);
+            String indexPath = getDefaultIndexPath(collectionId);
             DBDefaultIndex defaultIndex = new DBDefaultIndex(indexPath);
             return documentService.findAll(collectionId, defaultIndex.values());
         }
@@ -44,7 +44,7 @@ public class CRUDServiceImpl implements CRUDService {
 
     @Override
     public List<DBDocument> findByIndexedProperty(IndexedDocument indexedDocument) {
-        final String defaultIndexPath = buildDefaultIndexPath(indexedDocument.getCollectionId());
+        final String defaultIndexPath = getDefaultIndexPath(indexedDocument.getCollectionId());
         List<String> pointers = extractRequestedData(indexedDocument);
         if (!pointers.isEmpty()) {
             final DBDefaultIndex defaultIndex = new DBDefaultIndex(defaultIndexPath);
@@ -66,7 +66,7 @@ public class CRUDServiceImpl implements CRUDService {
 
     @Override
     public void updateByDefaultId(CollectionId collectionId, DBDocument dbDocument) {
-        DBDefaultIndex defaultIndex = new DBDefaultIndex(buildDefaultIndexPath(collectionId));
+        DBDefaultIndex defaultIndex = new DBDefaultIndex(getDefaultIndexPath(collectionId));
         defaultIndex.get(dbDocument.getDefaultId()).orElseThrow(() -> new DocumentNotFoundException("Document not found"));
         DBDocumentLocation updatedLocation = documentService.save(collectionId, dbDocument);
         indexService.update(collectionId, new Pair<>(dbDocument, updatedLocation));
@@ -94,7 +94,7 @@ public class CRUDServiceImpl implements CRUDService {
     private List<String> extractRequestedData(IndexedDocument indexedDocument) {
         final String indexedPropertyValue = indexedDocument.getIndexedPropertyValue();
         final CollectionId collectionId = indexedDocument.getCollectionId();
-        final String requestedIndexPath = buildRequestedIndexPath(collectionId, indexedDocument.getIndexedPropertyName());
+        final String requestedIndexPath = getRequestedIndexPath(collectionId, indexedDocument.getIndexedPropertyName());
         DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
         return requestedIndex.get(indexedPropertyValue).orElse(new ArrayList<>());
     }

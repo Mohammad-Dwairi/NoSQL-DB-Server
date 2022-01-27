@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.atypon.nosqldbserver.utils.DBFilePath.buildUsersFilePath;
+import static com.atypon.nosqldbserver.utils.DBFilePath.getUsersFilePath;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 
 @Repository
@@ -21,7 +21,7 @@ public class UserRepositoryImpl implements UserRepository {
     private final DBFileAccess fileAccess;
 
     public UserRepositoryImpl() {
-        this.fileAccess = DBFileAccessPool.getInstance().getFileAccess(buildUsersFilePath());
+        this.fileAccess = DBFileAccessPool.getInstance().getFileAccess(getUsersFilePath());
     }
 
     @Override

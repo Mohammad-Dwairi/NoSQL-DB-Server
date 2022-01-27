@@ -65,7 +65,7 @@ public class SchemaServiceImpl implements SchemaService {
         if (find(name).isPresent()) {
             throw new SchemaAlreadyExistsException();
         }
-        fileService.createFolders(buildSchemaPath(name));
+        fileService.createFolders(getSchemaDirPath(name));
         DBSchema schema = new DBSchema(name);
         List<DBSchema> schemas = findAll();
         schemas.add(schema);
@@ -76,7 +76,7 @@ public class SchemaServiceImpl implements SchemaService {
     public void drop(String name) {
         List<DBSchema> schemas = findAll();
         if (schemas.stream().anyMatch(s -> s.getName().equals(name))) {
-            fileService.deleteFile(buildSchemaPath(name));
+            fileService.deleteFolders(getSchemaDirPath(name));
             schemas.removeIf(s -> s.getName().equals(name));
             writeToSchemaFile(schemas);
         } else {
@@ -86,12 +86,12 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public void importSchema(DBSchema schema) {
-        fileService.createFolders(buildSchemaPath(schema.getName()));
+        fileService.createFolders(getSchemaDirPath(schema.getName()));
         List<DBCollection> collections = schema.getCollections();
         collections.forEach(col -> {
             CollectionId collectionId = new CollectionId(schema.getName(), col.getName());
-            fileService.createFile(buildCollectionPath(collectionId));
-            fileService.createFile(buildDefaultIndexPath(collectionId));
+            fileService.createFile(getCollectionFilePath(collectionId));
+            fileService.createFile(getDefaultIndexPath(collectionId));
         });
         List<DBSchema> schemas = findAll();
         schemas.add(schema);

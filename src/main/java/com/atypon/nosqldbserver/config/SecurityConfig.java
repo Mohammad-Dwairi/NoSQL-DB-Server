@@ -49,11 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.headers().frameOptions().disable();
-        http.authorizeRequests().antMatchers(new String[]{"/login"}).permitAll();
-        http.authorizeRequests().antMatchers(HttpMethod.POST, "/db/{schemaName}", "/db/schemas/*", "/db/{schemaName}/index").hasRole("ADMIN");
-        http.authorizeRequests().antMatchers(HttpMethod.DELETE, "/db/{schemaName}", "/db/schemas/*").hasRole("ADMIN");
-        http.authorizeRequests().antMatchers("/db/schemas/{schemaName}/export", "/users/**").hasRole("ADMIN");
-
+        http.authorizeRequests().antMatchers("/login").permitAll();
+        http.authorizeRequests().antMatchers("/db/ddl-write/**", "db/users/**").hasRole("ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());

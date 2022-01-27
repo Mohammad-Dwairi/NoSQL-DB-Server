@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static com.atypon.nosqldbserver.utils.DBFilePath.buildDefaultIndexPath;
+import static com.atypon.nosqldbserver.utils.DBFilePath.getDefaultIndexPath;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSONList;
 
@@ -34,7 +34,7 @@ public class DefragmentationServiceImpl implements DefragmentationService {
     }
 
     private void startDefragmentation(CollectionId collectionId) {
-        final String defaultIndexPath = buildDefaultIndexPath(collectionId);
+        final String defaultIndexPath = getDefaultIndexPath(collectionId);
         DBDefaultIndex defaultIndex = new DBDefaultIndex(defaultIndexPath);
         List<DBDocument> validDocs = documentService.findAll(collectionId, defaultIndex.values());
         List<DBDocumentLocation> newLocations = rewriteDocuments(collectionId, validDocs);
@@ -54,7 +54,7 @@ public class DefragmentationServiceImpl implements DefragmentationService {
     }
 
     private List<DBDocumentLocation> rewriteDocuments(CollectionId collectionId, List<DBDocument> docs) {
-        String collectionPath = DBFilePath.buildCollectionPath(collectionId);
+        String collectionPath = DBFilePath.getCollectionFilePath(collectionId);
         List<String> docsJSONList = convertToJSONList(Arrays.asList(docs.toArray()));
         DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
         fileAccess.clear();

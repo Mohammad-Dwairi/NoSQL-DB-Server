@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static com.atypon.nosqldbserver.utils.DBFilePath.buildCollectionPath;
+import static com.atypon.nosqldbserver.utils.DBFilePath.getCollectionFilePath;
 import static com.atypon.nosqldbserver.utils.JSONUtils.*;
 
 @Service
@@ -17,7 +17,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public List<DBDocument> findAll(CollectionId collectionId) {
-        final String collectionPath = buildCollectionPath(collectionId);
+        final String collectionPath = getCollectionFilePath(collectionId);
         DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
         List<String> docsStringList = fileAccess.readLines();
         return convertToDBDocumentList(docsStringList);
@@ -25,7 +25,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public List<DBDocument> findAll(CollectionId collectionId, List<DBDocumentLocation> locations) {
-        String collectionPath = buildCollectionPath(collectionId);
+        String collectionPath = getCollectionFilePath(collectionId);
         DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
         List<String> documentsStringList = fileAccess.read(locations);
         return convertToDBDocumentList(documentsStringList);
@@ -33,7 +33,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DBDocument find(CollectionId collectionId, DBDocumentLocation location) {
-        final String collectionPath = buildCollectionPath(collectionId);
+        final String collectionPath = getCollectionFilePath(collectionId);
         DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
         String documentJSON = fileAccess.read(location);
         return convertToDBDocument(documentJSON);
@@ -41,7 +41,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     public DBDocumentLocation save(CollectionId collectionId, DBDocument document) {
-        String collectionPath = buildCollectionPath(collectionId);
+        String collectionPath = getCollectionFilePath(collectionId);
         DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(collectionPath);
         return fileAccess.write(convertToJSON(document));
     }

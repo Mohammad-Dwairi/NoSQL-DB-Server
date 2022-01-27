@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.atypon.nosqldbserver.utils.DBFilePath.buildDefaultIndexPath;
+import static com.atypon.nosqldbserver.utils.DBFilePath.getDefaultIndexPath;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 
 @Service
@@ -31,7 +31,7 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void save(CollectionId collectionId, Pair<DBDocument, DBDocumentLocation> docLocationPair) {
-        DBDefaultIndex defaultIndex = new DBDefaultIndex(buildDefaultIndexPath(collectionId));
+        DBDefaultIndex defaultIndex = new DBDefaultIndex(getDefaultIndexPath(collectionId));
         defaultIndex.put(docLocationPair.getKey().getDefaultId(), docLocationPair.getValue());
         writeIndex(defaultIndex);
         updateRegisteredIndexes(collectionId, docLocationPair.getKey());
@@ -40,7 +40,7 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void update(CollectionId collectionId, Pair<DBDocument, DBDocumentLocation> docLocationPair) {
-        DBDefaultIndex defaultIndex = new DBDefaultIndex(buildDefaultIndexPath(collectionId));
+        DBDefaultIndex defaultIndex = new DBDefaultIndex(getDefaultIndexPath(collectionId));
         defaultIndex.put(docLocationPair.getKey().getDefaultId(), docLocationPair.getValue());
         writeIndex(defaultIndex);
         reIndexRegisteredIndexes(collectionId);
@@ -49,7 +49,7 @@ public class IndexServiceImpl implements IndexService {
 
     @Override
     public void drop(CollectionId collectionId, String id) {
-        DBDefaultIndex defaultIndex = new DBDefaultIndex(buildDefaultIndexPath(collectionId));
+        DBDefaultIndex defaultIndex = new DBDefaultIndex(getDefaultIndexPath(collectionId));
         defaultIndex.drop(id);
         writeIndex(defaultIndex);
         reIndexRegisteredIndexes(collectionId);

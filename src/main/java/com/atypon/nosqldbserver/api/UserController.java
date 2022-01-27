@@ -1,6 +1,13 @@
-package com.atypon.nosqldbserver.security.user;
+package com.atypon.nosqldbserver.api;
 
+import com.atypon.nosqldbserver.security.user.User;
+import com.atypon.nosqldbserver.security.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnResource;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,8 +18,9 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
+@Profile("master")
 @RequiredArgsConstructor
-@RequestMapping(path = "/users", produces = APPLICATION_JSON_VALUE)
+@RequestMapping(path = "db/users", produces = APPLICATION_JSON_VALUE)
 public class UserController {
 
     private final UserService userService;

@@ -57,8 +57,9 @@ public class CollectionServiceImpl implements CollectionService {
         DBSchema schema = schemas.stream().filter(s -> s.getName().equals(schemaName))
                 .findAny().orElseThrow(SchemaNotFoundException::new);
         schema.addCollection(collection);
-        fileService.createFile(buildCollectionPath(collectionId));
-        fileService.createFile(buildDefaultIndexPath(collectionId));
+        fileService.createFolders(getCollectionDirPath(collectionId));
+        fileService.createFile(getCollectionFilePath(collectionId));
+        fileService.createFile(getDefaultIndexPath(collectionId));
         schemaService.writeToSchemaFile(schemas);
     }
 
@@ -71,7 +72,7 @@ public class CollectionServiceImpl implements CollectionService {
         if (removed) {
             schemas.set(parentSchemaIndex, parentSchema);
             schemaService.writeToSchemaFile(schemas);
-            fileService.deleteFile(buildCollectionPath(collectionId));
+            fileService.deleteFolders(getCollectionDirPath(collectionId));
         } else {
             throw new CollectionNotFoundException();
         }
@@ -118,8 +119,8 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public void recoverExistingDocuments(CollectionId collectionId, String indexedPropertyName) {
-        final String defaultIndexPath = buildDefaultIndexPath(collectionId);
-        final String requestedIndexPath = buildRequestedIndexPath(collectionId, indexedPropertyName);
+        final String defaultIndexPath = getDefaultIndexPath(collectionId);
+        final String requestedIndexPath = getRequestedIndexPath(collectionId, indexedPropertyName);
         DBDefaultIndex defaultIndex = new DBDefaultIndex(defaultIndexPath);
         DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
         requestedIndex.clear();
@@ -136,13 +137,13 @@ public class CollectionServiceImpl implements CollectionService {
     }
 
     private String createRequestedIndexFile(CollectionId collectionId, String indexedPropertyName) {
-        final String path = buildRequestedIndexPath(collectionId, indexedPropertyName);
+        final String path = getRequestedIndexPath(collectionId, indexedPropertyName);
         fileService.createFile(path);
         return path;
     }
 
     private String createRegisteredIndexesFile(CollectionId collectionId) {
-        final String path = buildIndexesFilePath(collectionId);
+        final String path = getIndexesFilePath(collectionId);
         fileService.createFile(path);
         return path;
     }
