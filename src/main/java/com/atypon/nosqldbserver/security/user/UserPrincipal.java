@@ -1,5 +1,6 @@
 package com.atypon.nosqldbserver.security.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,10 +11,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Getter
+@AllArgsConstructor
 @RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
 
-    private final User user;
+    private User user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

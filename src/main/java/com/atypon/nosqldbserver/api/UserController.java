@@ -20,7 +20,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @Profile("master")
 @RequiredArgsConstructor
-@RequestMapping(path = "db/users", produces = APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/db/users", produces = APPLICATION_JSON_VALUE)
 public class UserController {
 
     private final UserService userService;

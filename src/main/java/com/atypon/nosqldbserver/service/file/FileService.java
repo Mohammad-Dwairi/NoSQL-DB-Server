@@ -11,4 +11,9 @@ public interface FileService {
     void deleteFile(String path);
 
     boolean exists(String path);
+
+    void zip(String targetPath);
+
+    void unzip(String zipFilePath, String destDir);
+
 }

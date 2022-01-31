@@ -11,6 +11,7 @@ import com.atypon.nosqldbserver.security.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -28,6 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
+@Profile({"default", "replica"})
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -35,7 +37,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
         prePostEnabled = true,
         securedEnabled = true,
         jsr250Enabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class ReplicaSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
     private final JWTService jwtService;
@@ -49,8 +51,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.headers().frameOptions().disable();
-        http.authorizeRequests().antMatchers("/login").permitAll();
-        http.authorizeRequests().antMatchers("/db/ddl-write/**", "db/users/**").hasRole("ADMIN");
+        http.authorizeRequests().antMatchers("/db/sync/**").hasRole("NODE");
         http.authorizeRequests().anyRequest().authenticated();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());

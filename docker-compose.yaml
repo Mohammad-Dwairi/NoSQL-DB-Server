@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+
+  controller:
+    image: mdwairi/nosqldb
+    command: ["/bin/sh", "./script.sh"]
+    container_name: controller
+    environment:
+      - NODE_MODE=master
+    #volumes:
+    links:
+      - worker
+    ports:
+      - "8080:8080"
+    networks:
+      - dbnetwork
+  worker:
+    image: mdwairi/nosqldb
+    # container_name: worker
+    environment:
+      - NODE_MODE=replica
+      - M
+    ports:
+      - "8080"
+    networks:
+      - dbnetwork
+
+networks:
+  dbnetwork:
+    name: dbnetwork

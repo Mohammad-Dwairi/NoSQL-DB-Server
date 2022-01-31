@@ -1,12 +1,11 @@
 package com.atypon.nosqldbserver.access;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DBFileAccessPool {
 
     private static DBFileAccessPool INSTANCE;
-    private final Map<String, DBFileAccess> fileAccessMap;
+    private final ConcurrentHashMap<String, DBFileAccess> fileAccessMap;
 
     private DBFileAccessPool() {
         this.fileAccessMap = new ConcurrentHashMap<>();

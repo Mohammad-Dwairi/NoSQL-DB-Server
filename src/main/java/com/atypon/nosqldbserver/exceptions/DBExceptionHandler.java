@@ -57,7 +57,7 @@ public class DBExceptionHandler {
         return new ResponseEntity<>(errorResponse, METHOD_NOT_ALLOWED);
     }
 
-    @ExceptionHandler(value = {AuthenticationException.class})
+    @ExceptionHandler(value = {DBAuthenticationException.class})
     public ResponseEntity<Object> forbidden(Exception e) {
         errorResponse.setStatus(FORBIDDEN.value());
         errorResponse.setMessage(e.getMessage());

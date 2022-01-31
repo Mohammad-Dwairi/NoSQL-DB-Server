@@ -1,6 +1,6 @@
 package com.atypon.nosqldbserver.security.user;
 
-import com.atypon.nosqldbserver.exceptions.AuthenticationException;
+import com.atypon.nosqldbserver.exceptions.DBAuthenticationException;
 import com.atypon.nosqldbserver.exceptions.UserAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
         if (passwordEncoder.matches(oldPass, user.getPassword())) {
             user.setPassword(passwordEncoder.encode(newPass));
         } else {
-            throw new AuthenticationException("Invalid password");
+            throw new DBAuthenticationException("Invalid password");
         }
         deleteByUsername(username);
         register(user);
