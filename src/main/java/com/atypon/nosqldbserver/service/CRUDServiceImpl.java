@@ -4,11 +4,11 @@ import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
 import com.atypon.nosqldbserver.exceptions.CollectionNotFoundException;
 import com.atypon.nosqldbserver.exceptions.DocumentNotFoundException;
-import com.atypon.nosqldbserver.index.DBDefaultIndex;
-import com.atypon.nosqldbserver.index.DBRequestedIndex;
 import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.helper.IndexedDocument;
 import com.atypon.nosqldbserver.helper.Pair;
+import com.atypon.nosqldbserver.index.DBDefaultIndex;
+import com.atypon.nosqldbserver.index.DBRequestedIndex;
 import com.atypon.nosqldbserver.service.collection.CollectionService;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.service.index.IndexService;
@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.getDefaultIndexPath;
 import static com.atypon.nosqldbserver.utils.DBFilePath.getRequestedIndexPath;
@@ -58,6 +59,14 @@ public class CRUDServiceImpl implements CRUDService {
     }
 
     @Override
+    public List<DBDocument> findByDefaultId(IndexedDocument indexedDocument) {
+        CollectionId collectionId = indexedDocument.getCollectionId();
+        DBDefaultIndex index = new DBDefaultIndex(getDefaultIndexPath(collectionId));
+        Optional<DBDocumentLocation> locationOptional = index.get(indexedDocument.getIndexedPropertyValue());
+        return locationOptional.map(location -> List.of(documentService.find(collectionId, location))).orElse(null);
+    }
+
+    @Override
     public void save(CollectionId collectionId, Object document) {
         DBDocument dbDocument = new DBDocument(generateDefaultId(), document);
         DBDocumentLocation location = documentService.save(collectionId, dbDocument);
@@ -65,30 +74,47 @@ public class CRUDServiceImpl implements CRUDService {
     }
 
     @Override
-    public void updateByDefaultId(CollectionId collectionId, DBDocument dbDocument) {
+    public void updateByDefaultId(IndexedDocument indexedDocument, Object updated) {
+        CollectionId collectionId = indexedDocument.getCollectionId();
+        final String defaultId = indexedDocument.getIndexedPropertyValue();
         DBDefaultIndex defaultIndex = new DBDefaultIndex(getDefaultIndexPath(collectionId));
-        defaultIndex.get(dbDocument.getDefaultId()).orElseThrow(() -> new DocumentNotFoundException("Document not found"));
-        DBDocumentLocation updatedLocation = documentService.save(collectionId, dbDocument);
-        indexService.update(collectionId, new Pair<>(dbDocument, updatedLocation));
+        defaultIndex.get(defaultId).orElseThrow(() -> new DocumentNotFoundException("Document not found"));
+        DBDocument updatedDocument = new DBDocument(defaultId, updated);
+        DBDocumentLocation updatedLocation = documentService.save(collectionId, updatedDocument);
+        indexService.update(collectionId, new Pair<>(updatedDocument, updatedLocation));
     }
 
     @Override
     public void updateByIndexedProperty(IndexedDocument indexedDocument, Object updatedDocument) {
         List<String> updatedPointers = extractRequestedData(indexedDocument);
+        IndexedDocument defaultIndexedDocument = IndexedDocument.builder()
+                .collectionId(indexedDocument.getCollectionId())
+                .indexedPropertyName("defaultId")
+                .build();
         updatedPointers.forEach(pointer -> {
-            updateByDefaultId(indexedDocument.getCollectionId(), new DBDocument(pointer, updatedDocument));
+            defaultIndexedDocument.setIndexedPropertyValue(pointer);
+            updateByDefaultId(defaultIndexedDocument, updatedDocument);
         });
     }
 
     @Override
-    public void deleteByDefaultId(CollectionId collectionId, String defaultId) {
+    public void deleteByDefaultId(IndexedDocument indexedDocument) {
+        CollectionId collectionId = indexedDocument.getCollectionId();
+        String defaultId = indexedDocument.getIndexedPropertyValue();
         indexService.drop(collectionId, defaultId);
     }
 
     @Override
     public void deleteByIndexedProperty(IndexedDocument indexedDocument) {
         List<String> deletedPointers = extractRequestedData(indexedDocument);
-        deletedPointers.forEach(pointer -> deleteByDefaultId(indexedDocument.getCollectionId(), pointer));
+        IndexedDocument defaultIndexedDocument = IndexedDocument.builder()
+                .collectionId(indexedDocument.getCollectionId())
+                .indexedPropertyName("defaultId")
+                .build();
+        deletedPointers.forEach(pointer -> {
+            defaultIndexedDocument.setIndexedPropertyValue(pointer);
+            deleteByDefaultId(defaultIndexedDocument);
+        });
     }
 
     private List<String> extractRequestedData(IndexedDocument indexedDocument) {

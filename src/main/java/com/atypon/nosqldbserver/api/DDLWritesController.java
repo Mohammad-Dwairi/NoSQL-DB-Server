@@ -53,6 +53,4 @@ public class DDLWritesController {
         collectionService.createRequestedIndex(collectionId, propertyName);
     }
 
-
-
 }

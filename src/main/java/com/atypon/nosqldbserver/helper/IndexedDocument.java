@@ -1,16 +1,14 @@
 package com.atypon.nosqldbserver.helper;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
-@Getter
-@ToString
-@RequiredArgsConstructor
+@Data
+@Builder
+@AllArgsConstructor
 public class IndexedDocument {
 
-    private final CollectionId collectionId;
-    private final String indexedPropertyName;
-    private final String indexedPropertyValue;
+    private CollectionId collectionId;
+    private String indexedPropertyName;
+    private String indexedPropertyValue;
 
 }

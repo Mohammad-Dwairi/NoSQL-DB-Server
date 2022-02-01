@@ -3,9 +3,7 @@ package com.atypon.nosqldbserver.cache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class LRUCache<K, V> {
@@ -37,5 +35,9 @@ public class LRUCache<K, V> {
 
     public void drop(K key) {
         cache.remove(key);
+    }
+
+    public Set<Map.Entry<K,V>> getEntries() {
+        return cache.entrySet();
     }
 }

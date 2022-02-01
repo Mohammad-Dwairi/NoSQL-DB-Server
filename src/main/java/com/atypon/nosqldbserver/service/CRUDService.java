@@ -12,13 +12,15 @@ public interface CRUDService {
 
     List<DBDocument> findByIndexedProperty(IndexedDocument indexedDocument);
 
+    List<DBDocument> findByDefaultId(IndexedDocument indexedDocument);
+
     void save(CollectionId collectionId, Object document);
 
-    void updateByDefaultId(CollectionId collectionId, DBDocument updatedDocument);
+    void updateByDefaultId(IndexedDocument indexedDocument, Object updatedDocument);
 
     void updateByIndexedProperty(IndexedDocument indexedDocument, Object updatedDocument);
 
-    void deleteByDefaultId(CollectionId collectionId, String defaultId);
+    void deleteByDefaultId(IndexedDocument indexedDocument);
 
     void deleteByIndexedProperty(IndexedDocument indexedDocument);
 

@@ -57,8 +57,14 @@ public class ReadsController {
         return crudService.findAllByDefaultIndex(collectionId);
     }
 
+    @GetMapping("/schema/{schemaName}/{collectionName}/{docId}")
+    public DBDocument findDocumentByDefaultId(CollectionId collectionId, @PathVariable String docId) {
+        IndexedDocument indexedDocument = new IndexedDocument(collectionId, "defaultId", docId);
+        return crudService.findByDefaultId(indexedDocument).get(0);
+    }
+
     @GetMapping(value = "/schema/{schemaName}/{collectionName}", params = {"property", "value"})
-    public List<DBDocument> findByIndexedProperty(CollectionId collectionId, @RequestParam String property, @RequestParam String value) {
+    public List<DBDocument> findDocumentByIndexedProperty(CollectionId collectionId, @RequestParam String property, @RequestParam String value) {
         return crudService.findByIndexedProperty(new IndexedDocument(collectionId, property, value));
     }
 }

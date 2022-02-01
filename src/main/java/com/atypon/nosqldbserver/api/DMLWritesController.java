@@ -30,12 +30,18 @@ public class DMLWritesController {
 
     @PutMapping("/schema/{schemaName}/{collectionName}/{docId}")
     public void update(CollectionId collectionId, @RequestBody Object updates, @PathVariable String docId) {
-        crudService.updateByDefaultId(collectionId, new DBDocument(docId, updates));
+        IndexedDocument indexedDocument = new IndexedDocument(collectionId, "defaultId", docId);
+        crudService.updateByDefaultId(indexedDocument, updates);
     }
 
     @DeleteMapping("/schema/{schemaName}/{collectionName}/{docId}")
     public void delete(CollectionId collectionId, @PathVariable String docId) {
-        crudService.deleteByDefaultId(collectionId, docId);
+        IndexedDocument indexedDocument = IndexedDocument.builder()
+                .collectionId(collectionId)
+                .indexedPropertyName("defaultId")
+                .indexedPropertyValue(docId)
+                .build();
+        crudService.deleteByDefaultId(indexedDocument);
     }
 
     @DeleteMapping(value = "/schema/{schemaName}/{collectionName}", params = {"property", "value"})
