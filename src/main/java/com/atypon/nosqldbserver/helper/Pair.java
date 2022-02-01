@@ -1,11 +1,13 @@
 package com.atypon.nosqldbserver.helper;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.beans.ConstructorProperties;
 
 @Data
+@EqualsAndHashCode
 @NoArgsConstructor
 public class Pair<K, V> {
 

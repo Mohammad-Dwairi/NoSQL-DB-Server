@@ -1,6 +1,7 @@
 package com.atypon.nosqldbserver.aspect;
 
 import com.atypon.nosqldbserver.cache.LRUCache;
+import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.helper.IndexedDocument;
 import com.atypon.nosqldbserver.helper.Pair;
@@ -50,21 +51,21 @@ public class CachingAspect {
         return retrievedData;
     }
 
-    @AfterReturning("execution(* com.atypon.nosqldbserver.service.CRUDService.save(..))")
-    public void afterSave(JoinPoint joinPoint) {
+    @AfterReturning(value = "execution(* com.atypon.nosqldbserver.service.CRUDService.save(..))", returning = "returned")
+    public void afterSave(JoinPoint joinPoint, DBDocument returned) {
         log.info("AFTER SAVE");
+        System.out.println(returned);
         CollectionId collectionId = (CollectionId) joinPoint.getArgs()[0];
-        Object document = joinPoint.getArgs()[1];
         synchronized (cache) {
-            maintainCache(collectionId, document);
+            maintainCache(collectionId, returned);
         }
     }
 
 
     @Before("execution(* com.atypon.nosqldbserver.service.CRUDService.delete*(..)) || " +
             "execution(* com.atypon.nosqldbserver.service.CRUDService.update*(..)))")
-    public void beforeDeleteOrDelete(JoinPoint joinPoint) {
-        log.info("BEFORE DELETE");
+    public void beforeDeleteOrUpdate(JoinPoint joinPoint) {
+        log.info("BEFORE DELETE OR UPDATE");
         IndexedDocument indexedDocument = (IndexedDocument) joinPoint.getArgs()[0];
         CollectionId collectionId = indexedDocument.getCollectionId();
         synchronized (cache) {
@@ -74,24 +75,30 @@ public class CachingAspect {
     }
 
     private void maintainCache(CollectionId collectionId, Object document) {
-        Map<String, Object> docMap = convertToObjectMap(convertToJSON(document));
+        DBDocument dbDocument = (DBDocument) document;
+        Map<String, Object> docMap = convertToObjectMap(convertToJSON(dbDocument.getDocument()));
+        System.out.println("DOCMAP");
+        System.out.println(docMap);
         List<Pair<String, String>> indexes = collectionService.getRegisteredIndexes(collectionId);
         final Pair<CollectionId, String> cacheKey = new Pair<>();
         indexes.forEach(index -> {
             final String indexedPropertyName = index.getKey();
-            final String indexedPropertyValue = (String) docMap.get(index.getKey());
+            final String indexedPropertyValue = (String )docMap.get(indexedPropertyName);
             cacheKey.setKey(collectionId);
             cacheKey.setValue(indexedPropertyName + "=" + indexedPropertyValue);
-            insertIntoCache(cacheKey, document);
+            System.out.println(cacheKey);
+            insertIntoCache(cacheKey, dbDocument);
         });
     }
 
     private void insertIntoCache(Pair<CollectionId, String> key, Object value) {
         Optional<List<Object>> cachedListOptional = cache.get(key);
         if (cachedListOptional.isPresent()) {
+            log.info("Adding to existing list");
             List<Object> cachedList = cachedListOptional.get();
             cachedList.add(value);
         } else {
+            log.info("Adding new record");
             List<Object> cachedList = new ArrayList<>();
             cachedList.add(value);
             cache.put(key, cachedList);

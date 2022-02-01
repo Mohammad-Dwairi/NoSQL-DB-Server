@@ -67,10 +67,11 @@ public class CRUDServiceImpl implements CRUDService {
     }
 
     @Override
-    public void save(CollectionId collectionId, Object document) {
+    public DBDocument save(CollectionId collectionId, Object document) {
         DBDocument dbDocument = new DBDocument(generateDefaultId(), document);
         DBDocumentLocation location = documentService.save(collectionId, dbDocument);
         indexService.save(collectionId, new Pair<>(dbDocument, location));
+        return dbDocument;
     }
 
     @Override

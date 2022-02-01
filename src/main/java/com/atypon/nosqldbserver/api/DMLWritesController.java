@@ -18,8 +18,8 @@ public class DMLWritesController {
     private final CRUDService crudService;
 
     @PostMapping("/schema/{schemaName}/{collectionName}")
-    public void save(CollectionId collectionId, @RequestBody Object document) {
-        crudService.save(collectionId, document);
+    public DBDocument save(CollectionId collectionId, @RequestBody Object document) {
+        return crudService.save(collectionId, document);
     }
 
     @PutMapping(value = "/schema/{schemaName}/{collectionName}", params = {"property", "value"})

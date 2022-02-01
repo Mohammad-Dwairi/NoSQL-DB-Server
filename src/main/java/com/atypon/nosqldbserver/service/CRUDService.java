@@ -14,7 +14,7 @@ public interface CRUDService {
 
     List<DBDocument> findByDefaultId(IndexedDocument indexedDocument);
 
-    void save(CollectionId collectionId, Object document);
+    DBDocument save(CollectionId collectionId, Object document);
 
     void updateByDefaultId(IndexedDocument indexedDocument, Object updatedDocument);
 
