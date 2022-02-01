@@ -5,7 +5,7 @@ import org.springframework.core.io.Resource;
 import java.util.List;
 
 public interface ReplicaService {
-    void register(String internalAddress, String externalAddress);
+    void register(String replicaAddress);
     void unregister(String internalAddress, String externalAddress);
     void notifyReplicas();
     Resource getDataSnapShot();

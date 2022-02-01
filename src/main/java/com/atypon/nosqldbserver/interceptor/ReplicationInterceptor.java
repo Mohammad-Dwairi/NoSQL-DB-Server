@@ -21,7 +21,7 @@ public class ReplicationInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        if (!request.getMethod().equals("GET") && !request.getServletPath().contains("/db/replica")) {
+        if (response.getStatus() == 200 && !request.getMethod().equals("GET") && !request.getServletPath().contains("/db/replica")) {
             replicaService.notifyReplicas();
         }
     }

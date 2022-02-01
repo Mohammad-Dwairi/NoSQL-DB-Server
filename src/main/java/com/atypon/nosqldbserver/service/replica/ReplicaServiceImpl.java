@@ -28,19 +28,16 @@ public class ReplicaServiceImpl implements ReplicaService {
     private final FileService fileService;
     private int turn = 0;
 
-    private final List<String> internalConnections = new ArrayList<>();
-    private final List<String> externalConnections = new ArrayList<>();
+    private final List<String> replicaConnections = new ArrayList<>();
 
     @Override
-    public void register(String internalAddress, String externalAddress) {
-        internalConnections.add(internalAddress);
-        externalConnections.add(externalAddress);
+    public void register(String replicaAddress) {
+        replicaConnections.add(replicaAddress);
     }
 
     @Override
     public void unregister(String internalAddress, String externalAddress) {
-        internalConnections.remove(internalAddress);
-        externalConnections.remove(externalAddress);
+        replicaConnections.remove(internalAddress);
     }
 
     @Override
@@ -49,7 +46,7 @@ public class ReplicaServiceImpl implements ReplicaService {
         String token = jwtService.getAccessToken(new UserPrincipal(node));
         WebClient webClient = WebClient.builder().build();
         Resource dataSnapShot = getDataSnapShot();
-        for (String replicaAddress : internalConnections) {
+        for (String replicaAddress : replicaConnections) {
             webClient.post().uri(replicaAddress + "/db/sync")
                     .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
                     .body(BodyInserters.fromMultipartData("file", dataSnapShot))
@@ -70,13 +67,13 @@ public class ReplicaServiceImpl implements ReplicaService {
 
     @Override
     public String getConnection() {
-        String connection = externalConnections.get(turn++);
-        turn %= externalConnections.size();
+        String connection = replicaConnections.get(turn++);
+        turn %= replicaConnections.size();
         return connection;
     }
 
     @Override
     public List<String> getReplicasConnections() {
-        return internalConnections;
+        return replicaConnections;
     }
 }

@@ -28,35 +28,48 @@ import static org.springframework.http.MediaType.valueOf;
 @RequiredArgsConstructor
 public class ReplicaInitializer implements CommandLineRunner {
 
-    @Value("${atypon.db.hostIP}")
-    private String HOST_IP;
+    @Value("${atypon.db.host.address}")
+    private String HOST_ADDRESS;
 
-    @Value("${atypon.db.mappedPort}")
-    private String MAPPED_PORT;
+    @Value("${server.port}")
+    private String PORT;
 
     private final FileService fileService;
     private final JWTService jwtService;
 
     @Override
-    public void run(String... args)  {
+    public void run(String... args) {
+        final String nodeToken = generateNodeToken();
+        final WebClient webClient = buildWebClient(nodeToken);
+        sendRegistrationRequestToMaster(webClient);
+        syncReplicaWithMaster(webClient);
+    }
 
+    private String generateNodeToken() {
         User node = User.builder().username("node").role(UserRole.ROLE_NODE).build();
-        String token = jwtService.getAccessToken(new UserPrincipal(node));
+        return jwtService.getAccessToken(new UserPrincipal(node));
+    }
 
-        WebClient webClient = WebClient.builder().baseUrl(HOST_IP).build();
-        webClient.post().uri("/db/replica").headers(httpHeaders -> {
-            httpHeaders.setContentType(valueOf(APPLICATION_JSON_VALUE));
-            httpHeaders.setBearerAuth(token);
-        }).body(BodyInserters.fromValue(MAPPED_PORT)).retrieve().bodyToMono(String.class).block();
+    private WebClient buildWebClient(String token) {
+        return WebClient.builder()
+                .baseUrl(HOST_ADDRESS)
+                .defaultHeaders(httpHeaders -> {
+                    httpHeaders.setContentType(valueOf(APPLICATION_JSON_VALUE));
+                    httpHeaders.setBearerAuth(token);
+                }).build();
+    }
 
+    private void sendRegistrationRequestToMaster(WebClient webClient) {
+        webClient.post().uri("/db/replica")
+                .body(BodyInserters.fromValue(PORT))
+                .retrieve().bodyToMono(String.class).block();
+    }
 
+    private void syncReplicaWithMaster(WebClient webClient) {
         Path path = Paths.get("./data.zip");
-        Flux<DataBuffer> dataBufferFlux = webClient.get()
-                .uri("/db/sync")
-                .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
+        Flux<DataBuffer> dataBufferFlux = webClient.get().uri("/db/sync")
                 .retrieve().bodyToFlux(DataBuffer.class);
         DataBufferUtils.write(dataBufferFlux, path, StandardOpenOption.CREATE).block();
-
-        fileService.unzip("./data.zip", "./");
+        fileService.unzip(path.toString(), "./");
     }
 }

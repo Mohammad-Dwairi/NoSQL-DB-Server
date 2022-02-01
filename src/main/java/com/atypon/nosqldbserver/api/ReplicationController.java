@@ -16,10 +16,10 @@ public class ReplicationController {
     private final ReplicaService replicaService;
 
     @PostMapping
-    public void registerReplica(@RequestBody String mappedPort, HttpServletRequest request) {
-        String internalReplicaAddress = "http://" + request.getRemoteAddr() + ":8080";
-        String externalReplicaAddress = "http://localhost:" + mappedPort;
-        replicaService.register(internalReplicaAddress, externalReplicaAddress);
+    public void registerReplica(@RequestBody String port, HttpServletRequest request) {
+        String replicaAddress = "http://" + request.getRemoteAddr() + ":" + port;
+        System.out.println("Address: " + replicaAddress);
+        replicaService.register(replicaAddress);
     }
 
     @GetMapping

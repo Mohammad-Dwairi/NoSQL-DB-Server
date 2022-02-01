@@ -21,13 +21,22 @@ public class MasterInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        final String dirsPath = "./data/users";
-        final String filePath = dirsPath + "/users.json";
-        if (fileService.createFolders(dirsPath) && fileService.createFile(filePath)) {
-            User defaultUser = User.builder().username("root").password("root").role(ROLE_ADMIN).build();
-            User node = User.builder().username("node").password("node").role(ROLE_NODE).build();
-            userService.register(defaultUser);
-            userService.register(node);
+        if (initializeUsersDirectory()) {
+            initializeDatabase();
         }
     }
+
+    private void initializeDatabase() {
+        User defaultUser = User.builder().username("root").password("root").role(ROLE_ADMIN).build();
+        User node = User.builder().username("node").password("node").role(ROLE_NODE).build();
+        userService.register(defaultUser);
+        userService.register(node);
+    }
+
+    private boolean initializeUsersDirectory() {
+        final String usersDirPath = "./data/users";
+        final String usersFilePath = usersDirPath + "/users.json";
+        return fileService.createFolders(usersDirPath) && fileService.createFile(usersFilePath);
+    }
+
 }
