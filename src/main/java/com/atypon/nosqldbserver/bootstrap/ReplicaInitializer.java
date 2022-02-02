@@ -28,7 +28,7 @@ import static org.springframework.http.MediaType.valueOf;
 @RequiredArgsConstructor
 public class ReplicaInitializer implements CommandLineRunner {
 
-    @Value("${atypon.db.host.address}")
+    @Value("${master.address}")
     private String HOST_ADDRESS;
 
     @Value("${server.port}")
