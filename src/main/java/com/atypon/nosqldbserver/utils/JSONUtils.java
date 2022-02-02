@@ -4,12 +4,15 @@ import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.exceptions.JSONParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JSONUtils {
 
     private static final ObjectMapper mapper = new ObjectMapper();

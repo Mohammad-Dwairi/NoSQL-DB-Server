@@ -9,10 +9,11 @@ import com.atypon.nosqldbserver.exceptions.CollectionAlreadyExistsException;
 import com.atypon.nosqldbserver.exceptions.CollectionNotFoundException;
 import com.atypon.nosqldbserver.exceptions.JSONParseException;
 import com.atypon.nosqldbserver.exceptions.SchemaNotFoundException;
-import com.atypon.nosqldbserver.index.DBDefaultIndex;
-import com.atypon.nosqldbserver.index.DBRequestedIndex;
 import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.helper.Pair;
+import com.atypon.nosqldbserver.index.DBDefaultIndex;
+import com.atypon.nosqldbserver.index.DBIndex;
+import com.atypon.nosqldbserver.index.DBRequestedIndex;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.service.file.FileService;
 import com.atypon.nosqldbserver.service.schema.SchemaService;
@@ -50,21 +51,23 @@ public class CollectionServiceImpl implements CollectionService {
     @Override
     public void create(String schemaName, DBCollection collection) {
         CollectionId collectionId = new CollectionId(schemaName, collection.getName());
-        if (find(collectionId).isPresent()) {
+        if (find(collectionId).isEmpty()) {
+            List<DBSchema> schemas = schemaService.findAll();
+            DBSchema schema = schemas.stream().filter(s -> s.getName().equals(schemaName))
+                    .findAny().orElseThrow(SchemaNotFoundException::new);
+            schema.addCollection(collection);
+            fileService.createFolders(getCollectionDirPath(collectionId));
+            fileService.createFile(getCollectionFilePath(collectionId));
+            fileService.createFile(getDefaultIndexPath(collectionId));
+            schemaService.writeToSchemaFile(schemas);
+        } else {
             throw new CollectionAlreadyExistsException();
         }
-        List<DBSchema> schemas = schemaService.findAll();
-        DBSchema schema = schemas.stream().filter(s -> s.getName().equals(schemaName))
-                .findAny().orElseThrow(SchemaNotFoundException::new);
-        schema.addCollection(collection);
-        fileService.createFolders(getCollectionDirPath(collectionId));
-        fileService.createFile(getCollectionFilePath(collectionId));
-        fileService.createFile(getDefaultIndexPath(collectionId));
-        schemaService.writeToSchemaFile(schemas);
     }
 
     @Override
     public void drop(CollectionId collectionId) {
+        checkCollection(collectionId);
         List<DBSchema> schemas = schemaService.findAll();
         DBSchema parentSchema = schemaService.find(collectionId.getSchemaName()).orElseThrow(SchemaNotFoundException::new);
         int parentSchemaIndex = schemas.indexOf(parentSchema);
@@ -73,48 +76,22 @@ public class CollectionServiceImpl implements CollectionService {
             schemas.set(parentSchemaIndex, parentSchema);
             schemaService.writeToSchemaFile(schemas);
             fileService.deleteFolders(getCollectionDirPath(collectionId));
-        } else {
-            throw new CollectionNotFoundException();
         }
     }
 
     @Override
     public void createRequestedIndex(CollectionId collectionId, String indexedPropertyName) {
-        try {
-            if (find(collectionId).isPresent()) {
-                String requestedIndexPath = createRequestedIndexFile(collectionId, indexedPropertyName);
-                String registeredIndexesFile = createRegisteredIndexesFile(collectionId);
-                DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(registeredIndexesFile);
-                String registeredIndexesJSON = fileAccess.read();
-                List<Pair<String, String>> registeredIndexes = new ArrayList<>();
-                if (!registeredIndexesJSON.isBlank()) {
-                    registeredIndexes = new ObjectMapper().readValue(registeredIndexesJSON, new TypeReference<>() {
-                    });
-                }
-                registeredIndexes.add(new Pair<>(indexedPropertyName, requestedIndexPath));
-                fileAccess.clear();
-                fileAccess.write(convertToJSON(registeredIndexes));
-                recoverExistingDocuments(collectionId, indexedPropertyName);
-            }
-        } catch (IOException e) {
-            throw new JSONParseException(e.getMessage());
-        }
+        checkCollection(collectionId);
+        String requestedIndexPath = createRequestedIndexFile(collectionId, indexedPropertyName);
+        List<Pair<String, String>> registeredIndexes = getRegisteredIndexes(collectionId);
+        registeredIndexes.add(new Pair<>(indexedPropertyName, requestedIndexPath));
+        writeToRegisteredIndexesFile(collectionId, registeredIndexes);
+        recoverExistingDocuments(collectionId, indexedPropertyName);
     }
 
     @Override
     public List<Pair<String, String>> getRegisteredIndexes(CollectionId collectionId) {
-        final String registeredIndexesFile = createRegisteredIndexesFile(collectionId);
-        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(registeredIndexesFile);
-        String indexesJSON = fileAccess.read();
-        if (!indexesJSON.isBlank()) {
-            try {
-                return new ObjectMapper().readValue(indexesJSON, new TypeReference<>() {
-                });
-            } catch (IOException e) {
-                throw new JSONParseException(e.getMessage());
-            }
-        }
-        return Collections.emptyList();
+        return tryReadRegisteredIndex(collectionId);
     }
 
     @Override
@@ -125,15 +102,11 @@ public class CollectionServiceImpl implements CollectionService {
         DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
         requestedIndex.clear();
         List<DBDocument> docs = documentService.findAll(collectionId, defaultIndex.values());
-
         docs.forEach(doc -> {
             Map<String, Object> docMap = convertToObjectMap(convertToJSON(doc.getDocument()));
             requestedIndex.add(docMap.get(indexedPropertyName), doc.getDefaultId());
         });
-
-        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(requestedIndexPath);
-        fileAccess.clear();
-        fileAccess.write(requestedIndex.toJSON());
+        writeToIndexFile(requestedIndex);
     }
 
     private String createRequestedIndexFile(CollectionId collectionId, String indexedPropertyName) {
@@ -146,6 +119,41 @@ public class CollectionServiceImpl implements CollectionService {
         final String path = getIndexesFilePath(collectionId);
         fileService.createFile(path);
         return path;
+    }
+
+    private List<Pair<String, String>> tryReadRegisteredIndex(CollectionId collectionId) {
+        final String registeredIndexesFile = createRegisteredIndexesFile(collectionId);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(registeredIndexesFile);
+        String indexesJSON = fileAccess.read();
+        if (!indexesJSON.isBlank()) {
+            try {
+                return new ObjectMapper().readValue(indexesJSON, new TypeReference<>() {
+                });
+            } catch (IOException e) {
+                throw new JSONParseException(e.getMessage());
+            }
+        }
+        return new ArrayList<>();
+    }
+
+
+    private void checkCollection(CollectionId collectionId) {
+        if (find(collectionId).isEmpty()) {
+            throw new CollectionNotFoundException();
+        }
+    }
+
+    private void writeToRegisteredIndexesFile(CollectionId collectionId, List<Pair<String, String>> newContent) {
+        String registeredIndexesFile = createRegisteredIndexesFile(collectionId);
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(registeredIndexesFile);
+        fileAccess.clear();
+        fileAccess.write(convertToJSON(newContent));
+    }
+
+    private void writeToIndexFile(DBIndex<?, ?> index) {
+        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(index.getPath());
+        fileAccess.clear();
+        fileAccess.write(index.toJSON());
     }
 
 

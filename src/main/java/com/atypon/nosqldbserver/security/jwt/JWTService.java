@@ -62,11 +62,6 @@ public class JWTService {
                 .build();
     }
 
-    public String getUsernameFromToken(String token) {
-        DecodedJWT decodedJWT = verifyToken(token);
-        return decodedJWT.getSubject();
-    }
-
     public String removeTokenBearerPrefix(String token) {
         if (token!= null && token.startsWith(TOKEN_PREFIX)) {
             return token.substring(TOKEN_PREFIX.length());

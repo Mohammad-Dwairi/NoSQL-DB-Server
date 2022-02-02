@@ -21,7 +21,11 @@ public class ReplicationInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        if (response.getStatus() == 200 && !request.getMethod().equals("GET") && !request.getServletPath().contains("/db/replica")) {
+        boolean isResponseOk = response.getStatus() == 200;
+        boolean isMutatingRequest = !request.getMethod().equals("GET");
+        boolean isReplicaRequest = request.getServletPath().contains("/db/replica");
+        boolean shouldNotify =  isResponseOk && isMutatingRequest && !isReplicaRequest;
+        if (shouldNotify) {
             replicaService.notifyReplicas();
         }
     }

@@ -10,10 +10,16 @@ import java.util.Optional;
 public interface CollectionService {
 
     List<DBCollection> findAll(String schemaName);
+
     Optional<DBCollection> find(CollectionId collectionId);
+
     void create(String schemaName, DBCollection collection);
+
     void drop(CollectionId collectionId);
+
     void createRequestedIndex(CollectionId colReq, String key);
+
     List<Pair<String, String>> getRegisteredIndexes(CollectionId collectionId);
+
     void recoverExistingDocuments(CollectionId collectionId, String indexedPropertyName);
 }

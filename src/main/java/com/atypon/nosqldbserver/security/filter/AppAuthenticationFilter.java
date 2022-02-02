@@ -29,7 +29,6 @@ public class AppAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final AuthenticationManager authenticationManager;
     private final AuthenticationSuccessHandler authenticationSuccessHandler;
     private final AuthenticationFailureHandler authenticationFailureHandler;
-    private final Environment environment;
 
     @Override
     @SneakyThrows

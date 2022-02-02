@@ -25,7 +25,7 @@ public class AppAuthenticationFailureHandler implements AuthenticationFailureHan
         log.error("AUTHENTICATION FAILURE HANDLER");
         log.error(e.getMessage());
         DBErrorResponse errorResponse = new DBErrorResponse();
-        errorResponse.setMessage("AUTHENTICATION_FAILED");
+        errorResponse.setMessage("Invalid username or password");
         errorResponse.setTimestamp(currentTimeMillis());
         errorResponse.setStatus(UNAUTHORIZED.value());
 

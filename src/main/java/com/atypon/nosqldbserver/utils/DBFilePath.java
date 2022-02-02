@@ -1,7 +1,10 @@
 package com.atypon.nosqldbserver.utils;
 
 import com.atypon.nosqldbserver.helper.CollectionId;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DBFilePath {
 
     public static String getSchemaDirPath(String schemaName) {

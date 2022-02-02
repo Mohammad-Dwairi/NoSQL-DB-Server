@@ -3,17 +3,12 @@ package com.atypon.nosqldbserver.service.file;
 import com.atypon.nosqldbserver.exceptions.FileCreationException;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.UnzipParameters;
 import org.apache.ant.compress.taskdefs.Unzip;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 @Service
 public class FileServiceImpl implements FileService {
