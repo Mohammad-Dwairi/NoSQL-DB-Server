@@ -37,3 +37,4 @@ services:
 networks:
   dbnetwork:
     name: dbnetwork
+    driver: bridge

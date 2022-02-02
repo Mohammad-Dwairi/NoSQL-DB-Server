@@ -37,7 +37,7 @@ public class LRUCache<K, V> {
         cache.remove(key);
     }
 
-    public Set<Map.Entry<K,V>> getEntries() {
-        return cache.entrySet();
+    public void invalidate() {
+        this.cache.clear();
     }
 }
