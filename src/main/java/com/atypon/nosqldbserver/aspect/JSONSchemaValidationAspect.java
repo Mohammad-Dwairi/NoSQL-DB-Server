@@ -36,19 +36,11 @@ public class JSONSchemaValidationAspect {
         return proceedingJoinPoint.proceed();
     }
 
-    @Around("execution(* com.atypon.nosqldbserver.service.CRUDService.updateByIndexedProperty(..))")
+    @Around("execution(* com.atypon.nosqldbserver.service.CRUDService.update*(..))")
     public Object aroundDocumentUpdateByIndexed(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         IndexedDocument indexedDocument = (IndexedDocument) proceedingJoinPoint.getArgs()[0];
         String document = convertToJSON(proceedingJoinPoint.getArgs()[1]);
         validate(indexedDocument.getCollectionId(), document);
-        return proceedingJoinPoint.proceed();
-    }
-
-    @Around("execution(* com.atypon.nosqldbserver.service.CRUDService.updateByDefaultId(..))")
-    public Object aroundDocumentUpdate(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        CollectionId collectionId = (CollectionId) proceedingJoinPoint.getArgs()[0];
-        DBDocument document = (DBDocument) proceedingJoinPoint.getArgs()[1];
-        validate(collectionId, convertToJSON(document.getDocument()));
         return proceedingJoinPoint.proceed();
     }
 
