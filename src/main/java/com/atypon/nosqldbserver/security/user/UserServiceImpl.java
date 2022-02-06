@@ -6,21 +6,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, @Lazy BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -38,7 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userRepository.findAll().stream().filter(user -> !user.getRole().equals(UserRole.ROLE_NODE)).collect(Collectors.toList());
     }
 
     @Override
@@ -63,15 +65,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updatePassword(String username, String oldPass, String newPass) {
-        User user = findAll().stream().filter(u -> u.getUsername().equals(username)).findFirst()
-                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+        User user = findByUsername(username);
         if (passwordEncoder.matches(oldPass, user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(newPass));
+            deleteByUsername(username);
+            user.setPassword(newPass);
+            register(user);
         } else {
             throw new DBAuthenticationException("Invalid password");
         }
-        deleteByUsername(username);
-        register(user);
     }
 
     @Override

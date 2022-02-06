@@ -1,6 +1,7 @@
 package com.atypon.nosqldbserver.service.replica;
 
 import com.atypon.nosqldbserver.exceptions.FileCreationException;
+import com.atypon.nosqldbserver.exceptions.NoReplicasFoundException;
 import com.atypon.nosqldbserver.security.jwt.JWTService;
 import com.atypon.nosqldbserver.security.user.User;
 import com.atypon.nosqldbserver.security.user.UserPrincipal;
@@ -67,6 +68,9 @@ public class ReplicaServiceImpl implements ReplicaService {
 
     @Override
     public String getConnection() {
+        if (replicaConnections.isEmpty()) {
+            throw new NoReplicasFoundException("No active read-only connections found");
+        }
         String connection = replicaConnections.get(turn++);
         turn %= replicaConnections.size();
         return connection;

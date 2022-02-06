@@ -2,6 +2,7 @@ package com.atypon.nosqldbserver.security.jwt;
 
 import com.atypon.nosqldbserver.exceptions.JWTException;
 import com.atypon.nosqldbserver.security.user.UserPrincipal;
+import com.atypon.nosqldbserver.security.user.UserRole;
 import com.atypon.nosqldbserver.security.user.UserService;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -59,6 +60,7 @@ public class JWTService {
                 .accessToken(accessToken)
                 .accessTokenExpiresAt(getTimeAfter(ACCESS_TOKEN_EXPIRATION_TIME))
                 .refreshToken(refreshToken)
+                .role(UserRole.valueOf(getAuthoritiesFromToken(accessToken).get(0).getAuthority()))
                 .build();
     }
 

@@ -25,7 +25,7 @@ public class DBExceptionHandler {
     }
 
     @ExceptionHandler(value = {SchemaNotFoundException.class, DBFileNotFoundException.class,
-            CollectionNotFoundException.class, DocumentNotFoundException.class})
+            CollectionNotFoundException.class, DocumentNotFoundException.class, NoReplicasFoundException.class})
     public ResponseEntity<Object> notFoundHandler(RuntimeException e) {
         errorResponse.setStatus(NOT_FOUND.value());
         errorResponse.setMessage(e.getMessage());

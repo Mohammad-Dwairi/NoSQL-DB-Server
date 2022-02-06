@@ -31,6 +31,8 @@ public class DMLWritesController {
     @PutMapping("/schema/{schemaName}/{collectionName}/{docId}")
     public void update(CollectionId collectionId, @RequestBody Object updates, @PathVariable String docId) {
         IndexedDocument indexedDocument = new IndexedDocument(collectionId, "defaultId", docId);
+        System.out.println("Indexed Document");
+        System.out.println(indexedDocument);
         crudService.updateByDefaultId(indexedDocument, updates);
     }
 

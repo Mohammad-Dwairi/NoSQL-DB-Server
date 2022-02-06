@@ -5,10 +5,7 @@ import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBCollection;
 import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.core.DBSchema;
-import com.atypon.nosqldbserver.exceptions.CollectionAlreadyExistsException;
-import com.atypon.nosqldbserver.exceptions.CollectionNotFoundException;
-import com.atypon.nosqldbserver.exceptions.JSONParseException;
-import com.atypon.nosqldbserver.exceptions.SchemaNotFoundException;
+import com.atypon.nosqldbserver.exceptions.*;
 import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.helper.Pair;
 import com.atypon.nosqldbserver.index.DBDefaultIndex;
@@ -17,6 +14,7 @@ import com.atypon.nosqldbserver.index.DBRequestedIndex;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.service.file.FileService;
 import com.atypon.nosqldbserver.service.schema.SchemaService;
+import com.atypon.nosqldbserver.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +24,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.*;
+import static com.atypon.nosqldbserver.utils.JSONUtils.*;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToObjectMap;
 
@@ -55,6 +54,7 @@ public class CollectionServiceImpl implements CollectionService {
             List<DBSchema> schemas = schemaService.findAll();
             DBSchema schema = schemas.stream().filter(s -> s.getName().equals(schemaName))
                     .findAny().orElseThrow(SchemaNotFoundException::new);
+            validateCollectionSchema(collection.getSchema());
             schema.addCollection(collection);
             fileService.createFolders(getCollectionDirPath(collectionId));
             fileService.createFile(getCollectionFilePath(collectionId));
@@ -154,6 +154,14 @@ public class CollectionServiceImpl implements CollectionService {
         DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(index.getPath());
         fileAccess.clear();
         fileAccess.write(index.toJSON());
+    }
+
+    private void validateCollectionSchema(Object collectionSchema) {
+        Map<String, Object> objectMap = convertToObjectMap(convertToJSON(collectionSchema));
+        boolean missingPropertiesKey = !objectMap.containsKey("properties");
+        if (missingPropertiesKey) {
+            throw new JSONSchemaValidationException("Collection schema must have 'properties' key");
+        }
     }
 
 

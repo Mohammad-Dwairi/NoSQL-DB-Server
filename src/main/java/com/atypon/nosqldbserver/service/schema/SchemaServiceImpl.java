@@ -86,25 +86,18 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public void importSchema(DBSchema schema) {
+        find(schema.getName()).ifPresent((s) -> {throw new SchemaAlreadyExistsException();});
         fileService.createFolders(getSchemaDirPath(schema.getName()));
         List<DBCollection> collections = schema.getCollections();
         collections.forEach(col -> {
             CollectionId collectionId = new CollectionId(schema.getName(), col.getName());
+            fileService.createFolders(getCollectionDirPath(collectionId));
             fileService.createFile(getCollectionFilePath(collectionId));
             fileService.createFile(getDefaultIndexPath(collectionId));
         });
         List<DBSchema> schemas = findAll();
         schemas.add(schema);
         writeToSchemaFile(schemas);
-    }
-
-    @Override
-    public void exportSchema(String schemaName, String targetFilePath) {
-        DBSchema schema = find(schemaName).orElseThrow(SchemaNotFoundException::new);
-        String schemaJSON = convertToJSON(schema);
-        fileService.createFile(targetFilePath);
-        DBFileAccess fileAccess = DBFileAccessPool.getInstance().getFileAccess(targetFilePath);
-        fileAccess.write(schemaJSON);
     }
 
     @Override

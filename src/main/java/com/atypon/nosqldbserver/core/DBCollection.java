@@ -15,7 +15,7 @@ public class DBCollection {
     private final String name;
     private final Object schema;
 
-    public DBCollection(@JsonProperty("collectionName") String name, @JsonProperty("collectionSchema") Object schema) {
+    public DBCollection(@JsonProperty("name") String name, @JsonProperty("schema") Object schema) {
         this.name = name;
         this.schema = schema;
     }

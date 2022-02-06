@@ -63,7 +63,7 @@ public class CRUDServiceImpl implements CRUDService {
         CollectionId collectionId = indexedDocument.getCollectionId();
         DBDefaultIndex index = new DBDefaultIndex(getDefaultIndexPath(collectionId));
         Optional<DBDocumentLocation> locationOptional = index.get(indexedDocument.getIndexedPropertyValue());
-        return locationOptional.map(location -> List.of(documentService.find(collectionId, location))).orElse(null);
+        return locationOptional.map(location -> List.of(documentService.find(collectionId, location))).orElse(Collections.emptyList());
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.atypon.nosqldbserver.exceptions.CollectionNotFoundException;
 import com.atypon.nosqldbserver.exceptions.JSONSchemaValidationException;
 import com.atypon.nosqldbserver.helper.CollectionId;
 import com.atypon.nosqldbserver.helper.IndexedDocument;
+import com.atypon.nosqldbserver.helper.Pair;
 import com.atypon.nosqldbserver.service.collection.CollectionService;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -17,6 +18,7 @@ import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
@@ -51,6 +53,13 @@ public class JSONSchemaValidationAspect {
     }
 
     private void validate(CollectionId collectionId, String document) {
+        JSONObject docJSON = new JSONObject(document);
+        List<String> indexKeys = collectionService.getRegisteredIndexes(collectionId).stream().map(Pair::getKey).collect(Collectors.toList());
+        indexKeys.forEach(indexKey -> {
+            if (!docJSON.has(indexKey)) {
+                throw new JSONSchemaValidationException("Invalid Document, missing " + indexKey);
+            }
+        });
         SchemaLoader loader = SchemaLoader.builder()
                 .schemaJson(getCollectionSchema(collectionId))
                 .draftV6Support()
