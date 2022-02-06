@@ -12,17 +12,12 @@ import com.atypon.nosqldbserver.service.CRUDService;
 import com.atypon.nosqldbserver.service.collection.CollectionService;
 import com.atypon.nosqldbserver.service.schema.SchemaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.util.InMemoryResource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
