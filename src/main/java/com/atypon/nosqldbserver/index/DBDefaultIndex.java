@@ -5,7 +5,6 @@ import com.atypon.nosqldbserver.access.DBFileAccessPool;
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
 import com.atypon.nosqldbserver.exceptions.DBFileNotFoundException;
 import com.atypon.nosqldbserver.exceptions.JSONParseException;
-import com.atypon.nosqldbserver.access.DBFileReader;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,11 +18,6 @@ public class DBDefaultIndex extends DBIndex<String, DBDocumentLocation> {
 
     public DBDefaultIndex(String path) {
         super(path, load(path));
-    }
-
-    @Override
-    public void put(String key, DBDocumentLocation location) {
-        super.indexMap.put(key, location);
     }
 
     private static LinkedHashMap<String, DBDocumentLocation> load(String path) {

@@ -66,7 +66,7 @@ public class SchemaServiceImpl implements SchemaService {
             throw new SchemaAlreadyExistsException();
         }
         fileService.createFolders(getSchemaDirPath(name));
-        DBSchema schema = new DBSchema(name);
+        DBSchema schema = DBSchema.create(name);
         List<DBSchema> schemas = findAll();
         schemas.add(schema);
         writeToSchemaFile(schemas);
@@ -90,7 +90,7 @@ public class SchemaServiceImpl implements SchemaService {
         fileService.createFolders(getSchemaDirPath(schema.getName()));
         List<DBCollection> collections = schema.getCollections();
         collections.forEach(col -> {
-            CollectionId collectionId = new CollectionId(schema.getName(), col.getName());
+            CollectionId collectionId = CollectionId.create(schema.getName(), col.getName());
             fileService.createFolders(getCollectionDirPath(collectionId));
             fileService.createFile(getCollectionFilePath(collectionId));
             fileService.createFile(getDefaultIndexPath(collectionId));

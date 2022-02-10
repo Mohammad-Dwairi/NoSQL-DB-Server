@@ -1,13 +1,12 @@
 package com.atypon.nosqldbserver.core;
 
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.beans.ConstructorProperties;
 
 @Getter
-@Builder
 @EqualsAndHashCode
 public class DBDocumentLocation {
 
@@ -15,8 +14,15 @@ public class DBDocumentLocation {
     private final long endByte;
 
     @ConstructorProperties({"startByte", "endByte"})
-    public DBDocumentLocation(long startByte, long endByte) {
+    private DBDocumentLocation(long startByte, long endByte) {
         this.startByte = startByte;
         this.endByte = endByte;
+    }
+
+    public static DBDocumentLocation create(@NonNull long startByte, @NonNull long endByte) {
+        if (startByte >= endByte) {
+            throw new RuntimeException("invalid document location");
+        }
+        return new DBDocumentLocation(startByte, endByte);
     }
 }

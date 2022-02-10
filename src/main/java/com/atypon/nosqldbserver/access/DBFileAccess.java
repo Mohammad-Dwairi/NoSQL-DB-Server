@@ -2,6 +2,7 @@ package com.atypon.nosqldbserver.access;
 
 
 import com.atypon.nosqldbserver.core.DBDocumentLocation;
+import lombok.NonNull;
 
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -11,9 +12,13 @@ public class DBFileAccess {
     private final String filePath;
     private final ReentrantReadWriteLock readWriteLock;
 
-    DBFileAccess(String filePath) {
+    private DBFileAccess(String filePath) {
         this.filePath = filePath;
         this.readWriteLock = new ReentrantReadWriteLock(true);
+    }
+
+    static DBFileAccess from(@NonNull String filePath) {
+        return new DBFileAccess(filePath);
     }
 
     public String read() {

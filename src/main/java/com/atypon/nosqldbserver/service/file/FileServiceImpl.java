@@ -35,14 +35,6 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void deleteFile(String path) {
-        File file = new File(path);
-        if (!file.delete()) {
-            throw new FileCreationException("failed to delete file in path " + path);
-        }
-    }
-
-    @Override
     public boolean exists(String path) {
         return new File(path).exists();
     }

@@ -1,7 +1,5 @@
 package com.atypon.nosqldbserver.security.user;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

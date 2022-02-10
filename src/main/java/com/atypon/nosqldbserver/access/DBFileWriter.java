@@ -22,7 +22,7 @@ public class DBFileWriter {
             raf.seek(fileLength);
             raf.write(document.getBytes(StandardCharsets.UTF_8));
             raf.write('\n');
-            return DBDocumentLocation.builder().startByte(fileLength).endByte(raf.getFilePointer()).build();
+            return DBDocumentLocation.create(fileLength, raf.getFilePointer());
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -39,7 +39,7 @@ public class DBFileWriter {
                 long start = raf.getFilePointer();
                 raf.write(document.getBytes(StandardCharsets.UTF_8));
                 raf.write('\n');
-                locations.add(DBDocumentLocation.builder().startByte(start).endByte(raf.getFilePointer()).build());
+                locations.add(DBDocumentLocation.create(start, raf.getFilePointer()));
             }
             return locations;
 

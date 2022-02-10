@@ -22,7 +22,7 @@ public class DBFileAccessPool {
         if (fileAccessMap.containsKey(filePath)) {
             return fileAccessMap.get(filePath);
         }
-        DBFileAccess fileAccess = new DBFileAccess(filePath);
+        DBFileAccess fileAccess = DBFileAccess.from(filePath);
         fileAccessMap.put(filePath, fileAccess);
         return fileAccess;
     }

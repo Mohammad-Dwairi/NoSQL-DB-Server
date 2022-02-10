@@ -3,6 +3,7 @@ package com.atypon.nosqldbserver.core;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +15,13 @@ public class DBSchema {
     private final String name;
     private final List<DBCollection> collections;
 
-    public DBSchema(@JsonProperty("name") String name) {
+    private DBSchema(@JsonProperty("name") String name) {
         this.name = name;
         this.collections = new ArrayList<>();
+    }
+
+    public static DBSchema create(@NonNull String name) {
+        return new DBSchema(name);
     }
 
     public void addCollection(DBCollection collection) {

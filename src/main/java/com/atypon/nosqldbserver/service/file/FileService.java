@@ -8,8 +8,6 @@ public interface FileService {
 
     void deleteFolders(String path);
 
-    void deleteFile(String path);
-
     boolean exists(String path);
 
     void zip(String targetPath);

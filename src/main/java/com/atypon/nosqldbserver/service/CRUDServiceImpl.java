@@ -68,7 +68,7 @@ public class CRUDServiceImpl implements CRUDService {
 
     @Override
     public DBDocument save(CollectionId collectionId, Object document) {
-        DBDocument dbDocument = new DBDocument(generateDefaultId(), document);
+        DBDocument dbDocument = DBDocument.create(generateDefaultId(), document);
         DBDocumentLocation location = documentService.save(collectionId, dbDocument);
         indexService.save(collectionId, new Pair<>(dbDocument, location));
         return dbDocument;
@@ -80,7 +80,7 @@ public class CRUDServiceImpl implements CRUDService {
         final String defaultId = indexedDocument.getIndexedPropertyValue();
         DBDefaultIndex defaultIndex = new DBDefaultIndex(getDefaultIndexPath(collectionId));
         defaultIndex.get(defaultId).orElseThrow(() -> new DocumentNotFoundException("Document not found"));
-        DBDocument updatedDocument = new DBDocument(defaultId, updated);
+        DBDocument updatedDocument = DBDocument.create(defaultId, updated);
         DBDocumentLocation updatedLocation = documentService.save(collectionId, updatedDocument);
         indexService.update(collectionId, new Pair<>(updatedDocument, updatedLocation));
     }

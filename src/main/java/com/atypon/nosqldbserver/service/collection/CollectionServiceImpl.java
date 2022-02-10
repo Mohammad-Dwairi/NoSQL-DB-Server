@@ -14,17 +14,18 @@ import com.atypon.nosqldbserver.index.DBRequestedIndex;
 import com.atypon.nosqldbserver.service.documents.DocumentService;
 import com.atypon.nosqldbserver.service.file.FileService;
 import com.atypon.nosqldbserver.service.schema.SchemaService;
-import com.atypon.nosqldbserver.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.atypon.nosqldbserver.utils.DBFilePath.*;
-import static com.atypon.nosqldbserver.utils.JSONUtils.*;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToJSON;
 import static com.atypon.nosqldbserver.utils.JSONUtils.convertToObjectMap;
 
@@ -49,7 +50,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public void create(String schemaName, DBCollection collection) {
-        CollectionId collectionId = new CollectionId(schemaName, collection.getName());
+        CollectionId collectionId = CollectionId.create(schemaName, collection.getName());
         if (find(collectionId).isEmpty()) {
             List<DBSchema> schemas = schemaService.findAll();
             DBSchema schema = schemas.stream().filter(s -> s.getName().equals(schemaName))

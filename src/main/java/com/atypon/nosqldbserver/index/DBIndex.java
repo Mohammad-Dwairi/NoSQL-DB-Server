@@ -35,26 +35,12 @@ public abstract class DBIndex<K, V> {
         this.indexMap.put(key, value);
     }
 
-    public boolean containsKey(K k) {
-        return this.indexMap.containsKey(k);
-    }
-
     public List<V> values() {
         return new ArrayList<>(this.indexMap.values());
     }
 
-    public List<K> keys() {
-        return new ArrayList<>(this.indexMap.keySet());
-    }
-
     public void drop(K key) {
         indexMap.remove(key);
-    }
-
-    public void drop(List<K> keys) {
-        for (K k : keys) {
-            indexMap.remove(k);
-        }
     }
 
     public int size() {

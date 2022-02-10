@@ -16,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +39,7 @@ public class ReadsController {
     }
 
     @GetMapping("/schema/{schemaName}/export")
-    public ResponseEntity<?> exportSchema(@PathVariable String schemaName, HttpServletResponse response) {
+    public ResponseEntity<?> exportSchema(@PathVariable String schemaName) {
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + schemaName + ".json\"")
                 .body(schemaService.find(schemaName).orElseThrow(SchemaNotFoundException::new));
@@ -68,12 +67,19 @@ public class ReadsController {
 
     @GetMapping("/schema/{schemaName}/{collectionName}/{docId}")
     public List<DBDocument> findDocumentByDefaultId(CollectionId collectionId, @PathVariable String docId) {
-        IndexedDocument indexedDocument = new IndexedDocument(collectionId, "defaultId", docId);
+        IndexedDocument indexedDocument = IndexedDocument.builder()
+                .collectionId(collectionId)
+                .indexedPropertyName("defaultId")
+                .indexedPropertyValue(docId).build();
         return crudService.findByDefaultId(indexedDocument);
     }
 
     @GetMapping(value = "/schema/{schemaName}/{collectionName}", params = {"property", "value"})
     public List<DBDocument> findDocumentByIndexedProperty(CollectionId collectionId, @RequestParam String property, @RequestParam String value) {
-        return crudService.findByIndexedProperty(new IndexedDocument(collectionId, property, value));
+        IndexedDocument indexedDocument = IndexedDocument.builder()
+                .collectionId(collectionId)
+                .indexedPropertyName(property)
+                .indexedPropertyValue(value).build();
+        return crudService.findByIndexedProperty(indexedDocument);
     }
 }

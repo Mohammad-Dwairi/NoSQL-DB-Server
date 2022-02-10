@@ -5,8 +5,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.beans.ConstructorProperties;
-
 @Getter
 @ToString
 @EqualsAndHashCode
@@ -19,5 +17,4 @@ public class DBCollection {
         this.name = name;
         this.schema = schema;
     }
-    
 }

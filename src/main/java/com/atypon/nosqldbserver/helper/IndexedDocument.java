@@ -2,9 +2,11 @@ package com.atypon.nosqldbserver.helper;
 
 import lombok.*;
 
+import static lombok.AccessLevel.*;
+
 @Data
 @Builder
-@AllArgsConstructor
+@AllArgsConstructor(access = PRIVATE)
 public class IndexedDocument {
 
     private CollectionId collectionId;

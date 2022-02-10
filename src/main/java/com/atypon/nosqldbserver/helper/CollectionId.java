@@ -1,16 +1,19 @@
 package com.atypon.nosqldbserver.helper;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+
+import static lombok.AccessLevel.*;
 
 @Getter
 @ToString
-@RequiredArgsConstructor
 @EqualsAndHashCode
+@RequiredArgsConstructor(access = PRIVATE)
 public class CollectionId {
 
     private final String schemaName;
     private final String collectionName;
+
+    public static CollectionId create(@NonNull String schemaName, @NonNull String collectionName) {
+        return new CollectionId(schemaName, collectionName);
+    }
 }

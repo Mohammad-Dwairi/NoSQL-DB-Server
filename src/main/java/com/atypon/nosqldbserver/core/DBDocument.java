@@ -1,13 +1,21 @@
 package com.atypon.nosqldbserver.core;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class DBDocument {
+
     private String defaultId;
     private Object document;
+
+    private DBDocument(@NonNull @JsonProperty("defaultId") String defaultId, @NonNull @JsonProperty("document") Object document) {
+        this.defaultId = defaultId;
+        this.document = document;
+    }
+
+    public static DBDocument create(@NonNull String id, @NonNull Object document) {
+        return new DBDocument(id, document);
+    }
 }

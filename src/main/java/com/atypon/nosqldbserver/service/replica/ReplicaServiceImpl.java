@@ -37,11 +37,6 @@ public class ReplicaServiceImpl implements ReplicaService {
     }
 
     @Override
-    public void unregister(String internalAddress, String externalAddress) {
-        replicaConnections.remove(internalAddress);
-    }
-
-    @Override
     public void notifyReplicas() {
         User node = userService.findByUsername("node");
         String token = jwtService.getAccessToken(new UserPrincipal(node));
@@ -76,8 +71,4 @@ public class ReplicaServiceImpl implements ReplicaService {
         return connection;
     }
 
-    @Override
-    public List<String> getReplicasConnections() {
-        return replicaConnections;
-    }
 }

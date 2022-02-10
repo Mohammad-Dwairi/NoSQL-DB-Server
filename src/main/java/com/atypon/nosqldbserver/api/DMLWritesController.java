@@ -24,15 +24,19 @@ public class DMLWritesController {
 
     @PutMapping(value = "/schema/{schemaName}/{collectionName}", params = {"property", "value"})
     public void update(CollectionId collectionId, @RequestParam String property, @RequestParam String value, @RequestBody Object updates) {
-        IndexedDocument indexedDocument = new IndexedDocument(collectionId, property, value);
+        IndexedDocument indexedDocument = IndexedDocument.builder()
+                .collectionId(collectionId)
+                .indexedPropertyName(property)
+                .indexedPropertyValue(value).build();
         crudService.updateByIndexedProperty(indexedDocument, updates);
     }
 
     @PutMapping("/schema/{schemaName}/{collectionName}/{docId}")
     public void update(CollectionId collectionId, @RequestBody Object updates, @PathVariable String docId) {
-        IndexedDocument indexedDocument = new IndexedDocument(collectionId, "defaultId", docId);
-        System.out.println("Indexed Document");
-        System.out.println(indexedDocument);
+        IndexedDocument indexedDocument = IndexedDocument.builder()
+                .collectionId(collectionId)
+                .indexedPropertyName("defaultId")
+                .indexedPropertyValue(docId).build();
         crudService.updateByDefaultId(indexedDocument, updates);
     }
 
@@ -48,6 +52,10 @@ public class DMLWritesController {
 
     @DeleteMapping(value = "/schema/{schemaName}/{collectionName}", params = {"property", "value"})
     public void delete(CollectionId collectionId, @RequestParam String property, @RequestParam String value) {
-        crudService.deleteByIndexedProperty(new IndexedDocument(collectionId, property, value));
+        IndexedDocument indexedDocument = IndexedDocument.builder()
+                .collectionId(collectionId)
+                .indexedPropertyName(property)
+                .indexedPropertyValue(value).build();
+        crudService.deleteByIndexedProperty(indexedDocument);
     }
 }
