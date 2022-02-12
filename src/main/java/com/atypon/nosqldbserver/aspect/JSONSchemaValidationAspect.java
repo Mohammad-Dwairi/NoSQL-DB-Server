@@ -1,7 +1,6 @@
 package com.atypon.nosqldbserver.aspect;
 
 import com.atypon.nosqldbserver.core.DBCollection;
-import com.atypon.nosqldbserver.core.DBDocument;
 import com.atypon.nosqldbserver.exceptions.CollectionNotFoundException;
 import com.atypon.nosqldbserver.exceptions.JSONSchemaValidationException;
 import com.atypon.nosqldbserver.helper.CollectionId;
