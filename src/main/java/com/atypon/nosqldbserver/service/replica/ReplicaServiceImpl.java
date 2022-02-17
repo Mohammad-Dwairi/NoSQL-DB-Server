@@ -10,15 +10,20 @@ import com.atypon.nosqldbserver.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,8 @@ public class ReplicaServiceImpl implements ReplicaService {
     private final UserService userService;
     private final FileService fileService;
     private int turn = 0;
+
+    private final HttpServletRequest request;
 
     private final List<String> replicaConnections = new ArrayList<>();
 
@@ -41,11 +48,15 @@ public class ReplicaServiceImpl implements ReplicaService {
         User node = userService.findByUsername("node");
         String token = jwtService.getAccessToken(new UserPrincipal(node));
         WebClient webClient = WebClient.builder().build();
-        Resource dataSnapShot = getDataSnapShot();
+        String requestBody = getRequestBody(request);
+        System.out.println(requestBody);
         for (String replicaAddress : replicaConnections) {
-            webClient.post().uri(replicaAddress + "/db/sync")
-                    .headers(httpHeaders -> httpHeaders.setBearerAuth(token))
-                    .body(BodyInserters.fromMultipartData("file", dataSnapShot))
+            webClient.method(HttpMethod.valueOf(request.getMethod())).uri(replicaAddress + getFullURI())
+                    .headers(httpHeaders -> {
+                        httpHeaders.setBearerAuth(token);
+                        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                    })
+                    .body(BodyInserters.fromValue(requestBody))
                     .retrieve().bodyToMono(String.class).block();
         }
     }
@@ -69,6 +80,24 @@ public class ReplicaServiceImpl implements ReplicaService {
         String connection = replicaConnections.get(turn++);
         turn %= replicaConnections.size();
         return connection;
+    }
+
+    private String getRequestBody(HttpServletRequest request) {
+        try {
+            return request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+        } catch (IOException e) {
+            throw new RuntimeException("failed to extract request body");
+        }
+    }
+
+    public String getFullURI() {
+        StringBuilder path = new StringBuilder(request.getServletPath());
+        String queryString = request.getQueryString();
+        if (queryString == null) {
+            return path.toString();
+        } else {
+            return path.append('?').append(queryString).toString();
+        }
     }
 
 }

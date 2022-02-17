@@ -1,6 +1,7 @@
 package com.atypon.nosqldbserver.security.filter;
 
 import com.atypon.nosqldbserver.exceptions.DBErrorResponse;
+import com.atypon.nosqldbserver.interceptor.BufferedServletRequestWrapper;
 import com.atypon.nosqldbserver.security.jwt.JWTService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +30,13 @@ public class AppAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        BufferedServletRequestWrapper wrappedRequest = new BufferedServletRequestWrapper(request);
         try {
-            String authorizationHeader = request.getHeader(AUTHORIZATION);
+            String authorizationHeader = wrappedRequest.getHeader(AUTHORIZATION);
             if (isCorrectAuthorizationHeader(authorizationHeader)) {
                 authorizeUser(authorizationHeader);
             }
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(wrappedRequest, response);
         } catch (RuntimeException e) {
             log.error(e.getMessage());
             SecurityContextHolder.clearContext();

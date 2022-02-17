@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@Profile("master")
 @RequestMapping("/db/dml-write")
 @RequiredArgsConstructor
 public class DMLWritesController {

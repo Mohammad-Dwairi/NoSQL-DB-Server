@@ -15,8 +15,6 @@ import com.atypon.nosqldbserver.service.index.IndexService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +26,7 @@ import static com.atypon.nosqldbserver.utils.DBFilePath.getRequestedIndexPath;
 @Service
 @RequiredArgsConstructor
 public class CRUDServiceImpl implements CRUDService {
-
+    private static int ID_SEQUENCE = 0;
     private final CollectionService collectionService;
     private final DocumentService documentService;
     private final IndexService indexService;
@@ -68,7 +66,7 @@ public class CRUDServiceImpl implements CRUDService {
 
     @Override
     public DBDocument save(CollectionId collectionId, Object document) {
-        DBDocument dbDocument = DBDocument.create(generateDefaultId(), document);
+        DBDocument dbDocument = DBDocument.create(Integer.toString(ID_SEQUENCE++), document);
         DBDocumentLocation location = documentService.save(collectionId, dbDocument);
         indexService.save(collectionId, new Pair<>(dbDocument, location));
         return dbDocument;
@@ -124,10 +122,6 @@ public class CRUDServiceImpl implements CRUDService {
         final String requestedIndexPath = getRequestedIndexPath(collectionId, indexedDocument.getIndexedPropertyName());
         DBRequestedIndex requestedIndex = new DBRequestedIndex(requestedIndexPath);
         return requestedIndex.get(indexedPropertyValue).orElse(new ArrayList<>());
-    }
-
-    private String generateDefaultId() {
-        return String.valueOf(Timestamp.from(Instant.now()).getTime());
     }
 
 }

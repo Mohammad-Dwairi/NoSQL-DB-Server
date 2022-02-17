@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@Profile("master")
 @RequestMapping("/db/ddl-write")
 @RequiredArgsConstructor
 public class DDLWritesController {

@@ -58,7 +58,10 @@ public class ReplicaSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().cors().configurationSource(corsConfigurationSource());
         http.headers().frameOptions().disable();
-        http.authorizeRequests().antMatchers("/db/sync/**").hasRole("NODE");
+        http.authorizeRequests()
+                .antMatchers(HttpMethod.POST).hasRole("NODE")
+                .antMatchers(HttpMethod.DELETE).hasRole("NODE")
+                .antMatchers(HttpMethod.PUT).hasRole("Node");
         http.authorizeRequests().anyRequest().authenticated();
         http.exceptionHandling().accessDeniedHandler(accessDeniedHandler());
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());
